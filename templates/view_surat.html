@@ -119,18 +119,66 @@
         <!-- Tanda tangan -->
         <div class="bg-white rounded-xl shadow-sm border p-6">
             <h4 class="font-semibold text-gray-700 mb-6 flex items-center gap-2"><i class="fas fa-signature text-blue-500"></i> Tanda Tangan</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-center text-sm">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center text-sm">
+                <!-- Pemohon -->
                 <div class="border rounded-lg p-4">
-                    <p class="text-xs text-gray-400 uppercase mb-8">Pemohon</p>
-                    <div class="border-t pt-3"><p class="font-semibold">{{ surat.pemohon }}</p></div>
+                    <p class="text-xs text-gray-400 uppercase mb-1">Pemohon</p>
+                    <div class="mb-6">&nbsp;</div>
+                    <div class="border-t-2 border-blue-500 pt-2">
+                        <p class="font-semibold text-gray-800">{{ surat.pemohon }}</p>
+                        <p class="text-xs text-gray-400">Pemohon</p>
+                    </div>
                 </div>
+                <!-- Satpam -->
                 <div class="border rounded-lg p-4">
-                    <p class="text-xs text-gray-400 uppercase mb-8">Diperiksa Oleh</p>
-                    <div class="border-t pt-3"><p class="font-semibold">{{ surat.diperiksa_oleh }}</p></div>
+                    <p class="text-xs text-gray-400 uppercase mb-1">Diperiksa (Satpam)</p>
+                    {% if surat.approval_satpam == 'sesuai' %}
+                    <p class="text-xs text-green-600 font-bold"><i class="fas fa-check-circle"></i> Sesuai</p>
+                    {% elif surat.approval_satpam == 'tidak_sesuai' %}
+                    <p class="text-xs text-red-600 font-bold"><i class="fas fa-times-circle"></i> Tidak Sesuai</p>
+                    {% else %}
+                    <p class="text-xs text-gray-400">⏳ Menunggu</p>
+                    {% endif %}
+                    {% if surat.approval_satpam_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_satpam_at }}</p>{% endif %}
+                    <div class="mb-2">&nbsp;</div>
+                    <div class="border-t-2 border-blue-500 pt-2">
+                        <p class="font-semibold text-gray-800">{{ surat.approval_satpam_by_name or '________________' }}</p>
+                        <p class="text-xs text-gray-400">Satpam</p>
+                    </div>
                 </div>
+                <!-- Asman Umum -->
                 <div class="border rounded-lg p-4">
-                    <p class="text-xs text-gray-400 uppercase mb-8">Disetujui Oleh</p>
-                    <div class="border-t pt-3"><p class="font-semibold">{{ surat.disetujui_oleh }}</p></div>
+                    <p class="text-xs text-gray-400 uppercase mb-1">Diperiksa (Asman)</p>
+                    {% if surat.approval_asman == 'approved' %}
+                    <p class="text-xs text-green-600 font-bold"><i class="fas fa-check-circle"></i> Disetujui</p>
+                    {% elif surat.approval_asman == 'rejected' %}
+                    <p class="text-xs text-red-600 font-bold"><i class="fas fa-times-circle"></i> Ditolak</p>
+                    {% else %}
+                    <p class="text-xs text-gray-400">⏳ Menunggu</p>
+                    {% endif %}
+                    {% if surat.approval_asman_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_asman_at }}</p>{% endif %}
+                    <div class="mb-2">&nbsp;</div>
+                    <div class="border-t-2 border-blue-500 pt-2">
+                        <p class="font-semibold text-gray-800">{{ surat.approval_asman_by_name or '________________' }}</p>
+                        <p class="text-xs text-gray-400">Asman Umum</p>
+                    </div>
+                </div>
+                <!-- Manager Administrasi -->
+                <div class="border rounded-lg p-4">
+                    <p class="text-xs text-gray-400 uppercase mb-1">Disetujui Oleh</p>
+                    {% if surat.approval_manager == 'approved' %}
+                    <p class="text-xs text-green-600 font-bold"><i class="fas fa-check-circle"></i> Disetujui</p>
+                    {% elif surat.approval_manager == 'rejected' %}
+                    <p class="text-xs text-red-600 font-bold"><i class="fas fa-times-circle"></i> Ditolak</p>
+                    {% else %}
+                    <p class="text-xs text-gray-400">⏳ Menunggu</p>
+                    {% endif %}
+                    {% if surat.approval_manager_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_manager_at }}</p>{% endif %}
+                    <div class="mb-2">&nbsp;</div>
+                    <div class="border-t-2 border-blue-500 pt-2">
+                        <p class="font-semibold text-gray-800">{{ surat.approval_manager_by_name or '________________' }}</p>
+                        <p class="text-xs text-gray-400">Manager Administrasi</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,9 +196,9 @@
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-800">Satpam / Security</p>
                         {% if surat.approval_satpam == 'sesuai' %}
-                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Sesuai — {{ surat.approval_satpam_at }}</p>
+                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Sesuai — {{ surat.approval_satpam_at }}{% if surat.approval_satpam_by_name %} oleh <strong>{{ surat.approval_satpam_by_name }}</strong>{% endif %}</p>
                         {% elif surat.approval_satpam == 'tidak_sesuai' %}
-                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Tidak Sesuai — {{ surat.approval_satpam_at }}</p>
+                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Tidak Sesuai — {{ surat.approval_satpam_at }}{% if surat.approval_satpam_by_name %} oleh <strong>{{ surat.approval_satpam_by_name }}</strong>{% endif %}</p>
                         {% else %}
                         <p class="text-xs text-gray-400">Menunggu pemeriksaan</p>
                         {% endif %}
@@ -167,9 +215,9 @@
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-800">Asman Umum</p>
                         {% if surat.approval_asman == 'approved' %}
-                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_asman_at }}</p>
+                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_asman_at }}{% if surat.approval_asman_by_name %} oleh <strong>{{ surat.approval_asman_by_name }}</strong>{% endif %}</p>
                         {% elif surat.approval_asman == 'rejected' %}
-                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_asman_at }}</p>
+                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_asman_at }}{% if surat.approval_asman_by_name %} oleh <strong>{{ surat.approval_asman_by_name }}</strong>{% endif %}</p>
                         {% else %}
                         <p class="text-xs text-gray-400">Menunggu review</p>
                         {% endif %}
@@ -186,9 +234,9 @@
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-800">Manager Administrasi</p>
                         {% if surat.approval_manager == 'approved' %}
-                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_manager_at }}</p>
+                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_manager_at }}{% if surat.approval_manager_by_name %} oleh <strong>{{ surat.approval_manager_by_name }}</strong>{% endif %}</p>
                         {% elif surat.approval_manager == 'rejected' %}
-                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_manager_at }}</p>
+                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_manager_at }}{% if surat.approval_manager_by_name %} oleh <strong>{{ surat.approval_manager_by_name }}</strong>{% endif %}</p>
                         {% else %}
                         <p class="text-xs text-gray-400">Menunggu approval final</p>
                         {% endif %}

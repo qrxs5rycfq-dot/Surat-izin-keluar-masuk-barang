@@ -363,8 +363,8 @@ def add_surat():
 def view_surat(id):
     conn = get_db()
     surat = _q(conn, "SELECT * FROM surat_izin WHERE id=%s", (id,), one=True)
-    conn.close()
     if not surat:
+        conn.close()
         flash('Surat tidak ditemukan.', 'danger')
         return redirect(url_for('surat_list'))
     surat = dict(surat)
@@ -373,6 +373,15 @@ def view_surat(id):
     except Exception:
         surat['barang_items'] = []
     surat['foto_list'] = _parse_foto_list(surat.get('lampiran_foto'))
+    # Look up approver names for signature section
+    for key in ('approval_satpam_by', 'approval_asman_by', 'approval_manager_by'):
+        uid = surat.get(key)
+        if uid:
+            u = _q(conn, "SELECT nama FROM users WHERE id=%s", (uid,), one=True)
+            surat[key + '_name'] = u['nama'] if u else '-'
+        else:
+            surat[key + '_name'] = ''
+    conn.close()
     return render_template('view_surat.html', surat=surat)
 
 
