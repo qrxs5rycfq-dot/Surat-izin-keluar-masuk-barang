@@ -1,64 +1,124 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Surat Izin Keluar Barang - PT PLN Indonesia Power</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .sidebar-link.active { background-color: rgba(255,255,255,0.15); }
+    </style>
+    {% block head %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="bi bi-box-seam"></i> IPIMS - Surat Izin Keluar Barang
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="bi bi-house"></i> Beranda
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('add_surat') }}">
-                            <i class="bi bi-plus-circle"></i> Buat Surat Baru
-                        </a>
-                    </li>
-                </ul>
+<body class="h-full bg-gray-50 text-gray-800">
+<div class="flex h-full">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="hidden lg:flex flex-col w-64 bg-gradient-to-b from-blue-800 to-blue-900 text-white min-h-screen fixed z-30">
+        <div class="px-6 py-5 border-b border-blue-700">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 rounded-lg p-2">
+                    <i class="fas fa-box-open text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm leading-tight">IPIMS</h1>
+                    <p class="text-blue-200 text-xs">Surat Izin Barang</p>
+                </div>
             </div>
         </div>
-    </nav>
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <a href="{{ url_for('dashboard') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition {{ 'active' if request.endpoint == 'dashboard' }}">
+                <i class="fas fa-chart-pie w-5 text-center"></i> Dashboard
+            </a>
+            <a href="{{ url_for('surat_list') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition {{ 'active' if request.endpoint == 'surat_list' }}">
+                <i class="fas fa-file-alt w-5 text-center"></i> Daftar Surat
+            </a>
+            <a href="{{ url_for('add_surat', jenis='keluar') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition {{ 'active' if request.endpoint == 'add_surat' }}">
+                <i class="fas fa-plus-circle w-5 text-center"></i> Buat Surat
+            </a>
 
-    <div class="container mt-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider">Laporan</p>
+            </div>
+            <a href="{{ url_for('export_excel') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition">
+                <i class="fas fa-file-excel w-5 text-center"></i> Export Excel
+            </a>
+            <a href="{{ url_for('export_report_pdf') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition">
+                <i class="fas fa-file-pdf w-5 text-center"></i> Export PDF
+            </a>
+
+            {% if current_user.role == 'admin' %}
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider">Admin</p>
+            </div>
+            <a href="{{ url_for('user_list') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition {{ 'active' if request.endpoint == 'user_list' }}">
+                <i class="fas fa-users-cog w-5 text-center"></i> Kelola User
+            </a>
+            <a href="{{ url_for('activity_log') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition {{ 'active' if request.endpoint == 'activity_log' }}">
+                <i class="fas fa-history w-5 text-center"></i> Log Aktivitas
+            </a>
             {% endif %}
+        </nav>
+        <div class="px-4 py-4 border-t border-blue-700">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 rounded-full w-9 h-9 flex items-center justify-center text-sm font-bold">
+                    {{ current_user.nama_lengkap[0] | upper }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate">{{ current_user.nama_lengkap }}</p>
+                    <p class="text-xs text-blue-300 capitalize">{{ current_user.role }}</p>
+                </div>
+                <a href="{{ url_for('logout') }}" class="text-blue-300 hover:text-white" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        <!-- Top bar (mobile) -->
+        <header class="lg:hidden bg-white shadow-sm sticky top-0 z-20">
+            <div class="flex items-center justify-between px-4 py-3">
+                <button onclick="document.getElementById('sidebar').classList.toggle('hidden');document.getElementById('sidebar').classList.toggle('flex');" class="text-gray-600">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <span class="font-bold text-blue-800">IPIMS</span>
+                <a href="{{ url_for('logout') }}" class="text-gray-600"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </header>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="px-4 lg:px-8 pt-4 space-y-2">
+            {% for cat, msg in messages %}
+            <div class="rounded-lg px-4 py-3 text-sm flex items-center gap-2
+                {{ 'bg-green-50 text-green-800 border border-green-200' if cat == 'success' else '' }}
+                {{ 'bg-red-50 text-red-800 border border-red-200' if cat == 'danger' else '' }}
+                {{ 'bg-yellow-50 text-yellow-800 border border-yellow-200' if cat == 'warning' else '' }}
+                {{ 'bg-blue-50 text-blue-800 border border-blue-200' if cat == 'info' else '' }}">
+                <i class="fas {{ 'fa-check-circle' if cat=='success' else 'fa-exclamation-circle' if cat=='danger' else 'fa-exclamation-triangle' if cat=='warning' else 'fa-info-circle' }}"></i>
+                {{ msg }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endwith %}
 
-        {% block content %}{% endblock %}
+        <!-- Page content -->
+        <main class="flex-1 px-4 lg:px-8 py-6">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="border-t bg-white px-4 lg:px-8 py-4 text-center text-xs text-gray-500">
+            &copy; {{ now.year }} {{ company_name }} &mdash; {{ company_sub }} &middot; No. Dokumen: ADP.17.01.015 &middot; Rev: 2
+        </footer>
     </div>
-
-    <footer class="mt-5 py-3 bg-light">
-        <div class="container text-center">
-            <p class="mb-0">
-                &copy; 2023 PT PLN Indonesia Power - Integrated Management System<br>
-                <small>No. Dokumen: ADP.17.01.015 | Revisi: 2</small>
-            </p>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts %}{% endblock %}
+</div>
+{% block scripts %}{% endblock %}
 </body>
 </html>
