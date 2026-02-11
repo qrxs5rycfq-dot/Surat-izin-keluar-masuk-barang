@@ -78,14 +78,18 @@
     <!-- Lampiran Foto -->
     <div class="bg-white rounded-xl shadow-sm border p-6">
         <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h3>
-        {% if surat.lampiran_foto %}
+        {% if surat.foto_list %}
         <div class="mb-4">
-            <p class="text-sm text-gray-500 mb-2">Foto saat ini:</p>
-            <img src="{{ url_for('static', filename='uploads/' + surat.lampiran_foto) }}" class="max-h-48 rounded-lg shadow">
+            <p class="text-sm text-gray-500 mb-2">Foto saat ini ({{ surat.foto_list|length }} foto):</p>
+            <div class="flex flex-wrap gap-3">
+                {% for foto in surat.foto_list %}
+                <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="max-h-48 rounded-lg shadow">
+                {% endfor %}
+            </div>
         </div>
         {% endif %}
-        <input type="file" name="lampiran_foto" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-        <p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ingin mengganti foto</p>
+        <input type="file" name="lampiran_foto" accept="image/*" multiple class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+        <p class="text-xs text-gray-400 mt-1">Pilih foto tambahan (bisa lebih dari satu). Foto lama tetap disimpan.</p>
     </div>
 
     <!-- Tanda Tangan -->

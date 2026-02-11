@@ -98,10 +98,14 @@
         </div>
 
         <!-- Lampiran foto -->
-        {% if surat.lampiran_foto %}
+        {% if surat.foto_list %}
         <div class="bg-white rounded-xl shadow-sm border p-6">
-            <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h4>
-            <img src="{{ url_for('static', filename='uploads/' + surat.lampiran_foto) }}" class="rounded-lg shadow max-w-full" alt="Lampiran">
+            <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto ({{ surat.foto_list|length }})</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {% for foto in surat.foto_list %}
+                <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="rounded-lg shadow max-w-full" alt="Lampiran {{ loop.index }}">
+                {% endfor %}
+            </div>
         </div>
         {% endif %}
     </div>

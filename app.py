@@ -41,6 +41,23 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
 
+def _parse_foto_list(lampiran_foto):
+    """Parse lampiran_foto field into a list of filenames.
+
+    Handles both legacy single-filename strings and the new JSON-array format.
+    Always returns a (possibly empty) list.
+    """
+    if not lampiran_foto:
+        return []
+    try:
+        parsed = json.loads(lampiran_foto)
+        if isinstance(parsed, list):
+            return [f for f in parsed if f]
+        return [str(parsed)] if parsed else []
+    except (json.JSONDecodeError, TypeError):
+        return [lampiran_foto] if lampiran_foto else []
+
+
 def role_required(*roles):
     def decorator(f):
         @wraps(f)
@@ -256,12 +273,14 @@ def add_surat():
                 flash(f'Field {f} harus diisi!', 'danger')
                 return redirect(url_for('add_surat'))
 
-        foto_filename = None
-        foto = request.files.get('lampiran_foto')
-        if foto and foto.filename and allowed_file(foto.filename):
-            ext = foto.filename.rsplit('.', 1)[1].lower()
-            foto_filename = f"{uuid.uuid4().hex}.{ext}"
-            foto.save(os.path.join(Config.UPLOAD_DIR, foto_filename))
+        foto_filenames = []
+        fotos = request.files.getlist('lampiran_foto')
+        for foto in fotos:
+            if foto and foto.filename and allowed_file(foto.filename):
+                ext = foto.filename.rsplit('.', 1)[1].lower()
+                fname = f"{uuid.uuid4().hex}.{ext}"
+                foto.save(os.path.join(Config.UPLOAD_DIR, fname))
+                foto_filenames.append(fname)
 
         try:
             barang = json.loads(request.form.get('barang_items', '[]'))
@@ -291,7 +310,7 @@ def add_surat():
             request.form['diperiksa_oleh'].strip(),
             request.form['disetujui_oleh'].strip(),
             json.dumps(barang, ensure_ascii=False),
-            foto_filename,
+            json.dumps(foto_filenames) if foto_filenames else None,
             'pending',
             current_user.id,
         ))
@@ -320,6 +339,7 @@ def view_surat(id):
         surat['barang_items'] = json.loads(surat['barang_items'])
     except Exception:
         surat['barang_items'] = []
+    surat['foto_list'] = _parse_foto_list(surat.get('lampiran_foto'))
     return render_template('view_surat.html', surat=surat)
 
 
@@ -333,12 +353,17 @@ def edit_surat(id):
         flash('Surat tidak ditemukan.', 'danger')
         return redirect(url_for('surat_list'))
     if request.method == 'POST':
-        foto_filename = surat['lampiran_foto']
-        foto = request.files.get('lampiran_foto')
-        if foto and foto.filename and allowed_file(foto.filename):
-            ext = foto.filename.rsplit('.', 1)[1].lower()
-            foto_filename = f"{uuid.uuid4().hex}.{ext}"
-            foto.save(os.path.join(Config.UPLOAD_DIR, foto_filename))
+        # Retain existing photos
+        existing_fotos = _parse_foto_list(surat['lampiran_foto'])
+        # Add newly uploaded photos
+        new_fotos = request.files.getlist('lampiran_foto')
+        for foto in new_fotos:
+            if foto and foto.filename and allowed_file(foto.filename):
+                ext = foto.filename.rsplit('.', 1)[1].lower()
+                fname = f"{uuid.uuid4().hex}.{ext}"
+                foto.save(os.path.join(Config.UPLOAD_DIR, fname))
+                existing_fotos.append(fname)
+        foto_value = json.dumps(existing_fotos) if existing_fotos else None
 
         try:
             barang = json.loads(request.form.get('barang_items', '[]'))
@@ -367,7 +392,7 @@ def edit_surat(id):
             request.form['diperiksa_oleh'].strip(),
             request.form['disetujui_oleh'].strip(),
             json.dumps(barang, ensure_ascii=False),
-            foto_filename,
+            foto_value,
             id,
         ))
         conn.close()
@@ -381,6 +406,7 @@ def edit_surat(id):
         surat['barang_items'] = json.loads(surat['barang_items'])
     except Exception:
         surat['barang_items'] = []
+    surat['foto_list'] = _parse_foto_list(surat.get('lampiran_foto'))
     return render_template('edit_surat.html', surat=surat)
 
 
@@ -435,6 +461,7 @@ def export_pdf(id):
         surat['barang_items'] = json.loads(surat['barang_items'])
     except Exception:
         surat['barang_items'] = []
+    surat['foto_list'] = _parse_foto_list(surat.get('lampiran_foto'))
 
     html = render_template('pdf_template.html', surat=surat,
                            upload_dir=os.path.abspath(Config.UPLOAD_DIR))

@@ -105,14 +105,12 @@
     <div class="bg-white rounded-xl shadow-sm border p-6">
         <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h3>
         <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <input type="file" name="lampiran_foto" accept="image/*" id="fotoInput" class="hidden" onchange="previewFoto(this)">
-            <div id="fotoPreview" class="hidden mb-3">
-                <img id="fotoImg" class="mx-auto max-h-48 rounded-lg shadow">
-            </div>
+            <input type="file" name="lampiran_foto" accept="image/*" multiple id="fotoInput" class="hidden" onchange="previewFotos(this)">
+            <div id="fotoPreview" class="hidden mb-3 flex flex-wrap gap-3 justify-center"></div>
             <label for="fotoInput" class="cursor-pointer inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition">
-                <i class="fas fa-upload"></i> Pilih Foto
+                <i class="fas fa-upload"></i> Pilih Foto (bisa lebih dari satu)
             </label>
-            <p class="text-xs text-gray-400 mt-2">Format: JPG, PNG, GIF, WEBP (Maks. 16MB)</p>
+            <p class="text-xs text-gray-400 mt-2">Format: JPG, PNG, GIF, WEBP (Maks. 16MB per file)</p>
         </div>
     </div>
 
@@ -202,14 +200,23 @@ document.getElementById('suratForm').addEventListener('submit', function(e) {
 document.addEventListener('input', function(e) { if (e.target.closest('#barangBody')) sync(); });
 document.addEventListener('DOMContentLoaded', function() { addRow(); });
 
-function previewFoto(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('fotoImg').src = e.target.result;
-            document.getElementById('fotoPreview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(input.files[0]);
+function previewFotos(input) {
+    const container = document.getElementById('fotoPreview');
+    container.innerHTML = '';
+    if (input.files && input.files.length) {
+        container.classList.remove('hidden');
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'max-h-48 rounded-lg shadow';
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    } else {
+        container.classList.add('hidden');
     }
 }
 </script>
