@@ -86,7 +86,7 @@ def init_db():
         disetujui_oleh VARCHAR(100) NOT NULL,
         barang_items TEXT NOT NULL,
         lampiran_foto TEXT,
-        status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+        status ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending',
         catatan TEXT,
         created_by INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -112,6 +112,21 @@ def init_db():
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     """)
 
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS notifications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT,
+        title VARCHAR(200) NOT NULL,
+        message TEXT NOT NULL,
+        link VARCHAR(255),
+        is_read TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user_id (user_id),
+        INDEX idx_is_read (is_read),
+        INDEX idx_created_at (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    """)
+
     conn.commit()
 
     # ------------------------------------------------------------------
@@ -128,11 +143,20 @@ def init_db():
 
     _migrate_table(cur, 'surat_izin', [
         ('jenis',           "ENUM('keluar','masuk') NOT NULL DEFAULT 'keluar' AFTER `id`"),
-        ('status',          "ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending' AFTER `lampiran_foto`"),
+        ('status',          "ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending' AFTER `lampiran_foto`"),
         ('catatan',         "TEXT AFTER `status`"),
         ('created_by',      "INT AFTER `catatan`"),
         ('updated_at',      "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`"),
     ])
+
+    # Ensure status ENUM includes 'review' for existing tables
+    try:
+        cur.execute(
+            "ALTER TABLE `surat_izin` MODIFY COLUMN `status` "
+            "ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending'"
+        )
+    except Exception:
+        pass
 
     conn.commit()
 

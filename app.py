@@ -118,11 +118,22 @@ def close_db(exc):
 
 @app.context_processor
 def inject_globals():
+    notif_count = 0
+    if current_user.is_authenticated:
+        try:
+            conn = get_db()
+            row = _q(conn, "SELECT COUNT(*) AS c FROM notifications WHERE user_id=%s AND is_read=0",
+                     (current_user.id,), one=True)
+            notif_count = row['c'] if row else 0
+            conn.close()
+        except Exception:
+            pass
     return dict(
         app_name=Config.APP_NAME,
         company_name=Config.COMPANY_NAME,
         company_sub=Config.COMPANY_SUB,
         now=datetime.now(),
+        notif_count=notif_count,
     )
 
 
@@ -201,6 +212,8 @@ def dashboard():
         "SELECT COUNT(*) AS c FROM surat_izin WHERE jenis='masuk'", one=True)['c']
     total_pending = _q(conn,
         "SELECT COUNT(*) AS c FROM surat_izin WHERE status='pending'", one=True)['c']
+    total_review = _q(conn,
+        "SELECT COUNT(*) AS c FROM surat_izin WHERE status='review'", one=True)['c']
     total_approved = _q(conn,
         "SELECT COUNT(*) AS c FROM surat_izin WHERE status='approved'", one=True)['c']
 
@@ -224,6 +237,7 @@ def dashboard():
                            total_keluar=total_keluar,
                            total_masuk=total_masuk,
                            total_pending=total_pending,
+                           total_review=total_review,
                            total_approved=total_approved,
                            recent=recent,
                            monthly=list(reversed(monthly)),
@@ -317,6 +331,12 @@ def add_surat():
         conn.close()
         _log(current_user.id, 'CREATE',
              f'Surat {jenis} {request.form["no_surat"]} dibuat')
+        _notify_all_admins(
+            'Surat Baru Dibuat',
+            f'{current_user.nama_lengkap} membuat surat {jenis} {request.form["no_surat"]}',
+            f'/surat/{sid}',
+            exclude_user=current_user.id,
+        )
         flash('Surat berhasil dibuat!', 'success')
         return redirect(url_for('view_surat', id=sid))
 
@@ -416,14 +436,26 @@ def edit_surat(id):
 def update_status(id):
     new_status = request.form.get('status')
     catatan = request.form.get('catatan', '')
-    if new_status not in ('approved', 'rejected', 'pending'):
+    if new_status not in ('approved', 'rejected', 'pending', 'review'):
         flash('Status tidak valid.', 'danger')
         return redirect(url_for('view_surat', id=id))
     conn = get_db()
+    surat = _q(conn, "SELECT no_surat, created_by FROM surat_izin WHERE id=%s", (id,), one=True)
     _exec(conn, "UPDATE surat_izin SET status=%s, catatan=%s WHERE id=%s",
           (new_status, catatan, id))
     conn.close()
     _log(current_user.id, 'STATUS', f'Surat #{id} status → {new_status}')
+
+    # Notify the surat creator about status change
+    if surat and surat.get('created_by'):
+        status_labels = {'approved': 'Disetujui', 'rejected': 'Ditolak',
+                         'review': 'Sedang Direview', 'pending': 'Pending'}
+        label = status_labels.get(new_status, new_status)
+        _notify(surat['created_by'],
+                f'Status Surat Diperbarui',
+                f'Surat {surat["no_surat"]} status diubah menjadi {label}',
+                f'/surat/{id}')
+
     flash(f'Status surat diubah menjadi {new_status}.', 'success')
     return redirect(url_for('view_surat', id=id))
 
@@ -684,6 +716,89 @@ def _log(user_id, action, desc):
         conn.close()
     except Exception:
         pass
+
+
+def _notify(user_id, title, message, link=None):
+    """Create a notification for a user."""
+    try:
+        conn = get_db()
+        _exec(conn,
+              "INSERT INTO notifications (user_id,title,message,link) VALUES (%s,%s,%s,%s)",
+              (user_id, title, message, link))
+        conn.close()
+    except Exception:
+        pass
+
+
+def _notify_all_admins(title, message, link=None, exclude_user=None):
+    """Send notification to all admin and manager users."""
+    try:
+        conn = get_db()
+        admins = _q(conn, "SELECT id FROM users WHERE role IN ('admin','manager') AND is_active=1")
+        for a in admins:
+            if exclude_user and a['id'] == exclude_user:
+                continue
+            _exec(conn,
+                  "INSERT INTO notifications (user_id,title,message,link) VALUES (%s,%s,%s,%s)",
+                  (a['id'], title, message, link))
+        conn.close()
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
+# Notifications
+# ---------------------------------------------------------------------------
+@app.route('/notifications')
+@login_required
+def notifications_page():
+    conn = get_db()
+    notifs = _q(conn,
+        "SELECT * FROM notifications WHERE user_id=%s ORDER BY created_at DESC LIMIT 50",
+        (current_user.id,))
+    conn.close()
+    return render_template('notifications.html', notifications=notifs)
+
+
+@app.route('/api/notifications')
+@login_required
+def api_notifications():
+    conn = get_db()
+    notifs = _q(conn,
+        "SELECT * FROM notifications WHERE user_id=%s ORDER BY created_at DESC LIMIT 20",
+        (current_user.id,))
+    conn.close()
+    result = []
+    for n in notifs:
+        result.append({
+            'id': n['id'],
+            'title': n['title'],
+            'message': n['message'],
+            'link': n['link'],
+            'is_read': n['is_read'],
+            'created_at': str(n['created_at']) if n['created_at'] else None,
+        })
+    return jsonify(result)
+
+
+@app.route('/api/notifications/read', methods=['POST'])
+@login_required
+def mark_notifications_read():
+    conn = get_db()
+    _exec(conn, "UPDATE notifications SET is_read=1 WHERE user_id=%s AND is_read=0",
+          (current_user.id,))
+    conn.close()
+    return jsonify(success=True)
+
+
+@app.route('/api/notifications/<int:nid>/read', methods=['POST'])
+@login_required
+def mark_notification_read(nid):
+    conn = get_db()
+    _exec(conn, "UPDATE notifications SET is_read=1 WHERE id=%s AND user_id=%s",
+          (nid, current_user.id))
+    conn.close()
+    return jsonify(success=True)
 
 
 # ---------------------------------------------------------------------------
