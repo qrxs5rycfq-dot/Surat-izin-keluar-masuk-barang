@@ -1,281 +1,210 @@
 {% extends "base.html" %}
+{% block title %}Buat Surat {{ 'Keluar' if jenis=='keluar' else 'Masuk' }} - {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">
-                    <i class="bi bi-file-earmark-plus"></i> Form Surat Izin Keluar Barang
-                </h4>
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">
+        <i class="fas fa-{{ 'arrow-up text-red-500' if jenis=='keluar' else 'arrow-down text-green-500' }} mr-2"></i>
+        Buat Surat Izin {{ 'Keluar' if jenis=='keluar' else 'Masuk' }} Barang
+    </h2>
+    <p class="text-gray-500 text-sm mt-1">Isi formulir berikut untuk membuat surat izin baru</p>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="suratForm" class="space-y-6">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="jenis" value="{{ jenis }}">
+
+    <!-- Info Surat -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-file-alt text-blue-500"></i> Informasi Surat</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. Surat <span class="text-red-500">*</span></label>
+                <input type="text" name="no_surat" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: 3783.SJ/07/ADPPGU/2023">
             </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('add_surat') }}" id="suratForm">
-                    <!-- Header Information -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="border p-3 bg-light rounded">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">No. Surat</label>
-                                            <input type="text" class="form-control" name="no_surat" 
-                                                   value="3783.SJ/07/ADPPGU/2023" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Tanggal</label>
-                                            <input type="date" class="form-control" name="tanggal" 
-                                                   value="{{ date_now }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Tgl. Terbit Dokumen</label>
-                                            <input type="date" class="form-control" name="tgl_terbit" 
-                                                   value="{{ date_now }}" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Divisi</label>
-                                            <select class="form-select" name="divisi" required>
-                                                <option value="PEMELIHARAAN">PEMELIHARAAN</option>
-                                                <option value="OPERASI">OPERASI</option>
-                                                <option value="UMUM">UMUM</option>
-                                                <option value="TEKNIK">TEKNIK</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="mb-3">
-                                            <label class="form-label">Lampiran Foto (Opsional)</label>
-                                            <input type="text" class="form-control" name="lampiran_foto" 
-                                                   placeholder="Deskripsi lampiran foto...">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Personal Information -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <h5>Data Pemohon</h5>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Nama</label>
-                                        <input type="text" class="form-control" name="nama" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label class="form-label">Badge</label>
-                                        <input type="text" class="form-control" name="badge" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-5">
-                                    <div class="mb-3">
-                                        <label class="form-label">Perusahaan</label>
-                                        <input type="text" class="form-control" name="perusahaan" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">No. Kendaraan</label>
-                                        <input type="text" class="form-control" name="no_kendaraan" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="mb-3">
-                                        <label class="form-label">No. SPK/MEMO</label>
-                                        <input type="text" class="form-control" name="no_spk" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Barang Items -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <h5>Daftar Barang</h5>
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="barangTable">
-                                    <thead>
-                                        <tr>
-                                            <th width="5%">No</th>
-                                            <th width="35%">Nama Barang</th>
-                                            <th width="15%">Jumlah</th>
-                                            <th width="15%">Satuan</th>
-                                            <th width="30%">Keterangan</th>
-                                            <th width="5%">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="barangTbody">
-                                        <!-- Barang rows will be added here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-primary" onclick="addBarangRow()">
-                                <i class="bi bi-plus"></i> Tambah Barang
-                            </button>
-                            <input type="hidden" name="barang_items" id="barangItems">
-                        </div>
-                    </div>
-
-                    <!-- Signatures -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <h5>Tanda Tangan</h5>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Pemohon</label>
-                                        <input type="text" class="form-control" name="pemohon" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Diperiksa Oleh</label>
-                                        <input type="text" class="form-control" name="diperiksa_oleh" 
-                                               value="Komandan Regu/Assistant Manager Umum" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <label class="form-label">Disetujui Oleh</label>
-                                        <input type="text" class="form-control" name="disetujui_oleh" 
-                                               value="Manager Administrasi" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-between">
-                                <a href="{{ url_for('index') }}" class="btn btn-secondary">
-                                    <i class="bi bi-arrow-left"></i> Kembali
-                                </a>
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-save"></i> Simpan Surat
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal <span class="text-red-500">*</span></label>
+                <input type="date" name="tanggal" value="{{ date_now }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tgl. Terbit Dokumen <span class="text-red-500">*</span></label>
+                <input type="date" name="tgl_terbit" value="{{ date_now }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Divisi <span class="text-red-500">*</span></label>
+                <select name="divisi" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="PEMELIHARAAN">PEMELIHARAAN</option>
+                    <option value="OPERASI">OPERASI</option>
+                    <option value="TEKNIK">TEKNIK</option>
+                    <option value="UMUM">UMUM</option>
+                </select>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Data Pemohon -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-user text-blue-500"></i> Data Pemohon</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label>
+                <input type="text" name="nama" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Badge <span class="text-red-500">*</span></label>
+                <input type="text" name="badge" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Perusahaan <span class="text-red-500">*</span></label>
+                <input type="text" name="perusahaan" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. Kendaraan <span class="text-red-500">*</span></label>
+                <input type="text" name="no_kendaraan" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. SPK/MEMO <span class="text-red-500">*</span></label>
+                <input type="text" name="no_spk" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+    </div>
+
+    <!-- Daftar Barang -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-700 flex items-center gap-2"><i class="fas fa-boxes text-blue-500"></i> Daftar Barang</h3>
+            <button type="button" onclick="addRow()" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition">
+                <i class="fas fa-plus"></i> Tambah
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="barangTable">
+                <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+                    <tr>
+                        <th class="px-3 py-2 text-left w-10">No</th>
+                        <th class="px-3 py-2 text-left">Nama Barang</th>
+                        <th class="px-3 py-2 text-left w-24">Jumlah</th>
+                        <th class="px-3 py-2 text-left w-28">Satuan</th>
+                        <th class="px-3 py-2 text-left">Keterangan</th>
+                        <th class="px-3 py-2 w-12"></th>
+                    </tr>
+                </thead>
+                <tbody id="barangBody"></tbody>
+            </table>
+        </div>
+        <input type="hidden" name="barang_items" id="barangItems">
+    </div>
+
+    <!-- Lampiran Foto -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h3>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <input type="file" name="lampiran_foto" accept="image/*" id="fotoInput" class="hidden" onchange="previewFoto(this)">
+            <div id="fotoPreview" class="hidden mb-3">
+                <img id="fotoImg" class="mx-auto max-h-48 rounded-lg shadow">
+            </div>
+            <label for="fotoInput" class="cursor-pointer inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition">
+                <i class="fas fa-upload"></i> Pilih Foto
+            </label>
+            <p class="text-xs text-gray-400 mt-2">Format: JPG, PNG, GIF, WEBP (Maks. 16MB)</p>
+        </div>
+    </div>
+
+    <!-- Tanda Tangan -->
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-signature text-blue-500"></i> Tanda Tangan</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Pemohon <span class="text-red-500">*</span></label>
+                <input type="text" name="pemohon" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Diperiksa Oleh <span class="text-red-500">*</span></label>
+                <input type="text" name="diperiksa_oleh" value="Komandan Regu" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Disetujui Oleh <span class="text-red-500">*</span></label>
+                <input type="text" name="disetujui_oleh" value="Manager Administrasi" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-between">
+        <a href="{{ url_for('surat_list') }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-5 py-2.5 rounded-lg transition text-sm">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+        <button type="submit" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition text-sm shadow-lg shadow-blue-600/30">
+            <i class="fas fa-save"></i> Simpan Surat
+        </button>
+    </div>
+</form>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    let barangCounter = 1;
+let rowNum = 0;
+function addRow(d) {
+    d = d || {};
+    rowNum++;
+    const tbody = document.getElementById('barangBody');
+    const tr = document.createElement('tr');
+    tr.className = 'border-t';
+    tr.innerHTML = `
+        <td class="px-3 py-2 text-center rnum">${rowNum}</td>
+        <td class="px-3 py-2"><input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bn" value="${d.nama_barang||''}" required></td>
+        <td class="px-3 py-2"><input type="number" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bj" value="${d.jumlah||1}" min="1" required></td>
+        <td class="px-3 py-2">
+            <select class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bs">
+                <option value="Unit" ${d.satuan==='Unit'?'selected':''}>Unit</option>
+                <option value="Set" ${d.satuan==='Set'?'selected':''}>Set</option>
+                <option value="Pcs" ${d.satuan==='Pcs'?'selected':''}>Pcs</option>
+                <option value="Dus" ${d.satuan==='Dus'?'selected':''}>Dus</option>
+                <option value="Lembar" ${d.satuan==='Lembar'?'selected':''}>Lembar</option>
+                <option value="Roll" ${d.satuan==='Roll'?'selected':''}>Roll</option>
+                <option value="Kg" ${d.satuan==='Kg'?'selected':''}>Kg</option>
+                <option value="Liter" ${d.satuan==='Liter'?'selected':''}>Liter</option>
+            </select>
+        </td>
+        <td class="px-3 py-2"><input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bk" value="${d.keterangan||''}"></td>
+        <td class="px-3 py-2 text-center"><button type="button" onclick="this.closest('tr').remove();renum();sync();" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>`;
+    tbody.appendChild(tr);
+    sync();
+}
 
-    // Add initial row
-    function addBarangRow(data = {}) {
-        const tbody = document.getElementById('barangTbody');
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${barangCounter}</td>
-            <td><input type="text" class="form-control form-control-sm" name="nama_barang_${barangCounter}" 
-                       value="${data.nama_barang || ''}" required></td>
-            <td><input type="number" class="form-control form-control-sm" name="jumlah_${barangCounter}" 
-                       value="${data.jumlah || '1'}" min="1" required></td>
-            <td>
-                <select class="form-select form-select-sm" name="satuan_${barangCounter}" required>
-                    <option value="Unit" ${data.satuan === 'Unit' ? 'selected' : ''}>Unit</option>
-                    <option value="Set" ${data.satuan === 'Set' ? 'selected' : ''}>Set</option>
-                    <option value="Pcs" ${data.satuan === 'Pcs' ? 'selected' : ''}>Pcs</option>
-                    <option value="Dus" ${data.satuan === 'Dus' ? 'selected' : ''}>Dus</option>
-                    <option value="Lembar" ${data.satuan === 'Lembar' ? 'selected' : ''}>Lembar</option>
-                    <option value="Roll" ${data.satuan === 'Roll' ? 'selected' : ''}>Roll</option>
-                </select>
-            </td>
-            <td><input type="text" class="form-control form-control-sm" name="keterangan_${barangCounter}" 
-                       value="${data.keterangan || ''}"></td>
-            <td>
-                <button type="button" class="btn btn-sm btn-danger" onclick="removeBarangRow(this)">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
-        barangCounter++;
-        updateBarangData();
-    }
+function renum() {
+    document.querySelectorAll('#barangBody tr').forEach((tr, i) => { tr.querySelector('.rnum').textContent = i + 1; });
+}
 
-    // Remove row
-    function removeBarangRow(button) {
-        const row = button.closest('tr');
-        row.remove();
-        updateBarangData();
-        updateRowNumbers();
-    }
-
-    // Update row numbers
-    function updateRowNumbers() {
-        const rows = document.querySelectorAll('#barangTbody tr');
-        rows.forEach((row, index) => {
-            row.cells[0].textContent = index + 1;
+function sync() {
+    const items = [];
+    document.querySelectorAll('#barangBody tr').forEach(tr => {
+        items.push({
+            nama_barang: tr.querySelector('.bn').value,
+            jumlah: tr.querySelector('.bj').value,
+            satuan: tr.querySelector('.bs').value,
+            keterangan: tr.querySelector('.bk').value
         });
+    });
+    document.getElementById('barangItems').value = JSON.stringify(items);
+}
+
+document.getElementById('suratForm').addEventListener('submit', function(e) {
+    if (!document.querySelectorAll('#barangBody tr').length) { e.preventDefault(); alert('Tambahkan minimal 1 barang!'); return; }
+    sync();
+});
+document.addEventListener('input', function(e) { if (e.target.closest('#barangBody')) sync(); });
+document.addEventListener('DOMContentLoaded', function() { addRow(); });
+
+function previewFoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('fotoImg').src = e.target.result;
+            document.getElementById('fotoPreview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
     }
-
-    // Update hidden input with JSON data
-    function updateBarangData() {
-        const items = [];
-        const rows = document.querySelectorAll('#barangTbody tr');
-        
-        rows.forEach(row => {
-            const rowIndex = row.rowIndex;
-            items.push({
-                nama_barang: row.querySelector(`[name^="nama_barang_"]`).value,
-                jumlah: row.querySelector(`[name^="jumlah_"]`).value,
-                satuan: row.querySelector(`[name^="satuan_"]`).value,
-                keterangan: row.querySelector(`[name^="keterangan_"]`).value
-            });
-        });
-        
-        document.getElementById('barangItems').value = JSON.stringify(items);
-    }
-
-    // Form submission
-    document.getElementById('suratForm').addEventListener('submit', function(e) {
-        if (barangCounter === 1) {
-            e.preventDefault();
-            alert('Minimal tambahkan 1 barang!');
-            return;
-        }
-        updateBarangData();
-    });
-
-    // Add event listeners to form inputs
-    document.addEventListener('input', function(e) {
-        if (e.target.matches('input[name^="nama_barang_"], input[name^="jumlah_"], select[name^="satuan_"], input[name^="keterangan_"]')) {
-            updateBarangData();
-        }
-    });
-
-    // Add initial barang row
-    document.addEventListener('DOMContentLoaded', function() {
-        addBarangRow();
-        
-        // Set today's date
-        const today = new Date().toISOString().split('T')[0];
-        document.querySelector('input[name="tanggal"]').value = today;
-        document.querySelector('input[name="tgl_terbit"]').value = today;
-    });
+}
 </script>
 {% endblock %}
