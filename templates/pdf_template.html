@@ -1,342 +1,157 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            font-size: 11pt;
-            line-height: 1.5;
-            margin: 0;
-            padding: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-        }
-        
-        .header h2 {
-            margin: 5px 0;
-            font-size: 14pt;
-        }
-        
-        .header h3 {
-            margin: 5px 0;
-            font-size: 12pt;
-            color: #2c3e50;
-        }
-        
-        .doc-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 9pt;
-            margin-bottom: 20px;
-        }
-        
-        .surat-info {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        
-        .data-table th {
-            background-color: #f2f2f2;
-            padding: 8px;
-            border: 1px solid #ddd;
-            text-align: left;
-            font-size: 10pt;
-        }
-        
-        .data-table td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            font-size: 10pt;
-        }
-        
-        .barang-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        
-        .barang-table th {
-            background-color: #e8f4f8;
-            padding: 8px;
-            border: 1px solid #ddd;
-            text-align: center;
-            font-size: 10pt;
-        }
-        
-        .barang-table td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            font-size: 10pt;
-        }
-        
-        .ttd-section {
-            margin-top: 50px;
-        }
-        
-        .ttd-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 60px;
-        }
-        
-        .ttd-box {
-            text-align: center;
-            width: 30%;
-        }
-        
-        .ttd-line {
-            width: 100%;
-            height: 1px;
-            background-color: #000;
-            margin: 50px 0 5px 0;
-        }
-        
-        .page-break {
-            page-break-after: always;
-        }
-        
-        .lampiran-box {
-            border: 1px solid #ddd;
-            min-height: 300px;
-            margin: 20px 0;
-            padding: 20px;
-        }
-        
-        .footer {
-            font-size: 8pt;
-            color: #666;
-            text-align: center;
-            margin-top: 30px;
-        }
-        
-        .pembatas {
-            border-top: 2px solid #000;
-            margin: 20px 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<style>
+    @page { size: A4; margin: 15mm 18mm; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; line-height: 1.5; margin: 0; }
+    .header { text-align: center; border-bottom: 3px solid #1e40af; padding-bottom: 12px; margin-bottom: 18px; }
+    .header h1 { font-size: 15pt; margin: 0 0 2px; color: #1e40af; letter-spacing: 1px; }
+    .header h2 { font-size: 10pt; margin: 0 0 4px; color: #444; font-weight: normal; }
+    .header h3 { font-size: 12pt; margin: 8px 0 0; color: #1e40af; }
+    .doc-meta { display: flex; justify-content: space-between; font-size: 8pt; color: #666; margin-bottom: 14px; }
+    .doc-meta div { line-height: 1.6; }
+    .info-box { background: #f0f5ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; }
+    .info-box table { width: 100%; }
+    .info-box td { padding: 2px 0; font-size: 9.5pt; }
+    .section-title { font-size: 10pt; font-weight: bold; color: #1e40af; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #dbeafe; }
+    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    .data-table th { background: #1e40af; color: #fff; font-size: 8.5pt; text-transform: uppercase; padding: 7px 10px; text-align: left; }
+    .data-table td { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; font-size: 9.5pt; }
+    .data-table tr:nth-child(even) td { background: #f9fafb; }
+    .barang-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    .barang-table th { background: #dbeafe; color: #1e40af; font-size: 8.5pt; text-transform: uppercase; padding: 7px 8px; text-align: center; border: 1px solid #bfdbfe; }
+    .barang-table td { padding: 6px 8px; border: 1px solid #e5e7eb; font-size: 9.5pt; }
+    .signature-container { margin-top: 30px; }
+    .sig-row { display: flex; justify-content: space-between; gap: 20px; }
+    .sig-box { text-align: center; flex: 1; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 10px; }
+    .sig-box .sig-label { font-size: 8pt; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 50px; }
+    .sig-box .sig-line { border-top: 2px solid #1e40af; margin: 0 20px; }
+    .sig-box .sig-name { font-size: 9pt; font-weight: bold; margin-top: 6px; }
+    .footer { text-align: center; font-size: 7.5pt; color: #9ca3af; margin-top: 20px; padding-top: 8px; border-top: 1px solid #e5e7eb; }
+    .page-break { page-break-before: always; }
+    .foto-box { border: 2px dashed #d1d5db; border-radius: 8px; min-height: 200px; padding: 20px; text-align: center; margin-top: 14px; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 8pt; font-weight: bold; }
+    .badge-keluar { background: #fee2e2; color: #dc2626; }
+    .badge-masuk { background: #dcfce7; color: #16a34a; }
+</style>
 </head>
 <body>
-    <!-- Halaman 1 -->
-    <div class="page">
-        <div class="header">
-            <h2>PT PLN INDONESIA POWER</h2>
-            <h2>INDONESIA POWER INTEGRATED MANAGEMENT SYSTEM</h2>
-            <h3>SURAT IZIN KELUAR BARANG</h3>
+<!-- PAGE 1 -->
+<div class="header">
+    <h1>PT PLN INDONESIA POWER</h1>
+    <h2>Indonesia Power Integrated Management System</h2>
+    <h3>SURAT IZIN {{ 'KELUAR' if surat.jenis == 'keluar' else 'MASUK' }} BARANG</h3>
+</div>
+
+<div class="doc-meta">
+    <div><strong>No. Dokumen:</strong> ADP.17.01.015<br><strong>Revisi:</strong> 2</div>
+    <div style="text-align:right"><strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}<br><strong>Halaman:</strong> 1/2</div>
+</div>
+
+<div class="info-box">
+    <table>
+        <tr><td style="width:50%"><strong>No:</strong> {{ surat.no_surat }}</td><td style="text-align:right"><strong>Tanggal:</strong> {{ surat.tanggal }}</td></tr>
+        <tr><td colspan="2"><strong>Divisi:</strong> {{ surat.divisi }} &nbsp; <span class="badge {{ 'badge-keluar' if surat.jenis=='keluar' else 'badge-masuk' }}">{{ surat.jenis | upper }}</span></td></tr>
+    </table>
+</div>
+
+<p class="section-title">DATA PEMOHON</p>
+<table class="data-table">
+    <tr><td style="width:25%;font-weight:bold">NAMA</td><td>{{ surat.nama }}</td></tr>
+    <tr><td style="font-weight:bold">BADGE</td><td>{{ surat.badge }}</td></tr>
+    <tr><td style="font-weight:bold">NO KENDARAAN</td><td>{{ surat.no_kendaraan }}</td></tr>
+    <tr><td style="font-weight:bold">PERUSAHAAN</td><td>{{ surat.perusahaan }}</td></tr>
+    <tr><td style="font-weight:bold">NO SPK/MEMO</td><td>{{ surat.no_spk }}</td></tr>
+</table>
+
+<p style="font-size:9.5pt;margin:10px 0;">
+    Untuk membawa barang {{ 'keluar dari' if surat.jenis == 'keluar' else 'masuk ke' }} PT Indonesia Power UBP Jawa Tengah 2 Adipala dengan rincian sebagai berikut:
+</p>
+
+<p class="section-title">DAFTAR BARANG</p>
+<table class="barang-table">
+    <thead><tr><th style="width:6%">NO</th><th style="width:35%">NAMA BARANG</th><th style="width:12%">JUMLAH</th><th style="width:12%">SATUAN</th><th>KETERANGAN</th></tr></thead>
+    <tbody>
+        {% for item in surat.barang_items %}
+        <tr>
+            <td style="text-align:center">{{ loop.index }}</td>
+            <td>{{ item.nama_barang }}</td>
+            <td style="text-align:center">{{ item.jumlah }}</td>
+            <td style="text-align:center">{{ item.satuan }}</td>
+            <td>{{ item.keterangan or '-' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="signature-container">
+    <div class="sig-row">
+        <div class="sig-box">
+            <div class="sig-label">Pemohon</div>
+            <div class="sig-line"></div>
+            <div class="sig-name">{{ surat.pemohon }}</div>
         </div>
-        
-        <div class="doc-info">
-            <div>
-                <strong>No. Dokumen:</strong> ADP.17.01.015<br>
-                <strong>Revisi:</strong> 2
-            </div>
-            <div>
-                <strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}<br>
-                <strong>Halaman:</strong> 1/2
-            </div>
+        <div class="sig-box">
+            <div class="sig-label">Diperiksa Oleh</div>
+            <div class="sig-line"></div>
+            <div class="sig-name">{{ surat.diperiksa_oleh }}</div>
         </div>
-        
-        <div class="surat-info">
-            <table width="100%">
-                <tr>
-                    <td width="50%"><strong>No:</strong> {{ surat.no_surat }}</td>
-                    <td width="50%" align="right"><strong>Tanggal:</strong> {{ surat.tanggal }}</td>
-                </tr>
-                <tr>
-                    <td colspan="2"><strong>Divisi:</strong> {{ surat.divisi }}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div>
-            <h4>DATA</h4>
-            <table class="data-table">
-                <tr>
-                    <td width="20%"><strong>NAMA</strong></td>
-                    <td>{{ surat.nama }}</td>
-                </tr>
-                <tr>
-                    <td><strong>BADGE</strong></td>
-                    <td>{{ surat.badge }}</td>
-                </tr>
-                <tr>
-                    <td><strong>NO KENDARAAN</strong></td>
-                    <td>{{ surat.no_kendaraan }}</td>
-                </tr>
-                <tr>
-                    <td><strong>PERUSAHAAN</strong></td>
-                    <td>{{ surat.perusahaan }}</td>
-                </tr>
-                <tr>
-                    <td><strong>NO SPK/MEMO</strong></td>
-                    <td>{{ surat.no_spk }}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <p>
-            Untuk membawa barang / keluar dari PT Indonesia Power UBP Jawa Tengah 2 Adipala 
-            dengan rincian sebagai berikut:
-        </p>
-        
-        <h4>DAFTAR BARANG</h4>
-        <table class="barang-table">
-            <thead>
-                <tr>
-                    <th width="5%">NO</th>
-                    <th width="35%">NAMA BARANG</th>
-                    <th width="15%">JUMLAH</th>
-                    <th width="15%">SATUAN</th>
-                    <th width="30%">KETERANGAN</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in surat.barang_items %}
-                <tr>
-                    <td align="center">{{ loop.index }}</td>
-                    <td>{{ item.nama_barang }}</td>
-                    <td align="center">{{ item.jumlah }}</td>
-                    <td align="center">{{ item.satuan }}</td>
-                    <td>{{ item.keterangan or '-' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-        <div class="ttd-section">
-            <div class="ttd-row">
-                <div class="ttd-box">
-                    <div class="ttd-line"></div>
-                    <strong>PEMOHON</strong><br>
-                    {{ surat.pemohon }}
-                </div>
-                <div class="ttd-box">
-                    <div class="ttd-line"></div>
-                    <strong>DIPERIKSA OLEH</strong><br>
-                    {{ surat.diperiksa_oleh }}
-                </div>
-                <div class="ttd-box">
-                    <div class="ttd-line"></div>
-                    <strong>DIKETAHUI</strong><br>
-                    Komandan Regu/Assistant Manager Umum
-                </div>
-            </div>
-            
-            <div style="margin-top: 50px;">
-                <div class="ttd-box" style="width: 30%;">
-                    <div class="ttd-line"></div>
-                    <strong>DISETUJUI OLEH</strong><br>
-                    {{ surat.disetujui_oleh }}
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            No. Dokumen: ADP.17.01.015 | Revisi: 2 | Tgl. Terbit: {{ surat.tgl_terbit }} | Halaman: 1/2
+        <div class="sig-box">
+            <div class="sig-label">Disetujui Oleh</div>
+            <div class="sig-line"></div>
+            <div class="sig-name">{{ surat.disetujui_oleh }}</div>
         </div>
     </div>
-    
-    <!-- Halaman 2 -->
-    <div class="page-break"></div>
-    
-    <div class="page">
-        <div class="header">
-            <h2>PT PLN INDONESIA POWER</h2>
-            <h2>INDONESIA POWER INTEGRATED MANAGEMENT SYSTEM</h2>
-            <h3>SURAT IZIN KELUAR BARANG</h3>
-        </div>
-        
-        <div class="doc-info">
-            <div>
-                <strong>No. Dokumen:</strong> ADP.17.01.015<br>
-                <strong>Revisi:</strong> 2
-            </div>
-            <div>
-                <strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}<br>
-                <strong>Halaman:</strong> 2/2
-            </div>
-        </div>
-        
-        <div class="surat-info">
-            <table width="100%">
-                <tr>
-                    <td width="50%"><strong>No:</strong> {{ surat.no_surat }}</td>
-                    <td width="50%" align="right"><strong>Tanggal:</strong> {{ surat.tanggal }}</td>
-                </tr>
-                <tr>
-                    <td colspan="2"><strong>Divisi:</strong> {{ surat.divisi }}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div>
-            <h4>DATA</h4>
-            <table class="data-table">
-                <tr>
-                    <td width="20%"><strong>NAMA</strong></td>
-                    <td>{{ surat.nama }}</td>
-                </tr>
-                <tr>
-                    <td><strong>BADGE</strong></td>
-                    <td>{{ surat.badge }}</td>
-                </tr>
-                <tr>
-                    <td><strong>NO KENDARAAN</strong></td>
-                    <td>{{ surat.no_kendaraan }}</td>
-                </tr>
-                <tr>
-                    <td><strong>PERUSAHAAN</strong></td>
-                    <td>{{ surat.perusahaan }}</td>
-                </tr>
-                <tr>
-                    <td><strong>NO SPK/MEMO</strong></td>
-                    <td>{{ surat.no_spk }}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div class="pembatas"></div>
-        
-        <h4>LAMPIRAN FOTO</h4>
-        <div class="lampiran-box">
-            {% if surat.lampiran_foto %}
-                <p>{{ surat.lampiran_foto }}</p>
-            {% else %}
-                <p style="text-align: center; color: #999; margin-top: 120px;">
-                    Foto barang yang akan dikeluarkan
-                </p>
-            {% endif %}
-        </div>
-        
-        <div style="margin-top: 30px;">
-            <h4>CATATAN PENTING:</h4>
-            <ol>
-                <li>Surat ini harus dibawa saat pengambilan barang</li>
-                <li>Barang harus diperiksa oleh petugas keamanan sebelum dibawa keluar</li>
-                <li>Tanda tangan dan stempel diperlukan untuk keabsahan surat</li>
-                <li>Lampiran foto wajib dilengkapi sebagai bukti visual barang</li>
-                <li>Surat ini berlaku hanya pada tanggal yang tercantum</li>
-                <li>Barang yang keluar harus sesuai dengan daftar yang tercantum</li>
-            </ol>
-        </div>
-        
-        <div class="footer">
-            No. Dokumen: ADP.17.01.015 | Revisi: 2 | Tgl. Terbit: {{ surat.tgl_terbit }} | Halaman: 2/2<br>
-            PT PLN Indonesia Power UBP Jawa Tengah 2 Adipala
-        </div>
-    </div>
+</div>
+
+<div class="footer">No. Dokumen: ADP.17.01.015 | Revisi: 2 | Tgl. Terbit: {{ surat.tgl_terbit }} | Halaman: 1/2</div>
+
+<!-- PAGE 2 -->
+<div class="page-break"></div>
+
+<div class="header">
+    <h1>PT PLN INDONESIA POWER</h1>
+    <h2>Indonesia Power Integrated Management System</h2>
+    <h3>SURAT IZIN {{ 'KELUAR' if surat.jenis == 'keluar' else 'MASUK' }} BARANG</h3>
+</div>
+
+<div class="doc-meta">
+    <div><strong>No. Dokumen:</strong> ADP.17.01.015<br><strong>Revisi:</strong> 2</div>
+    <div style="text-align:right"><strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}<br><strong>Halaman:</strong> 2/2</div>
+</div>
+
+<div class="info-box">
+    <table>
+        <tr><td style="width:50%"><strong>No:</strong> {{ surat.no_surat }}</td><td style="text-align:right"><strong>Tanggal:</strong> {{ surat.tanggal }}</td></tr>
+        <tr><td colspan="2"><strong>Divisi:</strong> {{ surat.divisi }}</td></tr>
+    </table>
+</div>
+
+<p class="section-title">LAMPIRAN FOTO</p>
+<div class="foto-box">
+    {% if surat.lampiran_foto %}
+    <p style="color:#666;font-size:9pt">Foto lampiran tersedia (lihat file: {{ surat.lampiran_foto }})</p>
+    {% else %}
+    <p style="color:#999;margin-top:80px;font-size:9pt">Foto barang yang akan di{{ 'keluarkan' if surat.jenis=='keluar' else 'masukkan' }}</p>
+    {% endif %}
+</div>
+
+<p class="section-title" style="margin-top:24px">CATATAN PENTING</p>
+<div style="font-size:9pt;line-height:1.8;padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;">
+    <ol style="margin:0;padding-left:18px;">
+        <li>Surat ini harus dibawa saat pengambilan/pengiriman barang</li>
+        <li>Barang harus diperiksa oleh petugas keamanan sebelum {{ 'keluar' if surat.jenis=='keluar' else 'masuk' }}</li>
+        <li>Tanda tangan dan stempel diperlukan untuk keabsahan surat</li>
+        <li>Lampiran foto wajib dilengkapi sebagai bukti visual barang</li>
+        <li>Surat ini berlaku hanya pada tanggal yang tercantum</li>
+        <li>Barang yang {{ 'keluar' if surat.jenis=='keluar' else 'masuk' }} harus sesuai dengan daftar yang tercantum</li>
+    </ol>
+</div>
+
+<div class="footer" style="margin-top:30px;">
+    No. Dokumen: ADP.17.01.015 | Revisi: 2 | Tgl. Terbit: {{ surat.tgl_terbit }} | Halaman: 2/2<br>
+    PT PLN Indonesia Power UBP Jawa Tengah 2 Adipala
+</div>
 </body>
 </html>
