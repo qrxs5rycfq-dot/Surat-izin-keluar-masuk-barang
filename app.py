@@ -4,6 +4,7 @@ import os
 import uuid
 from datetime import datetime, date
 from functools import wraps
+from urllib.parse import urlparse
 
 import bcrypt
 from flask import (
@@ -14,6 +15,7 @@ from flask_login import (
     LoginManager, UserMixin, login_user, logout_user,
     login_required, current_user,
 )
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
 
 from config import Config
@@ -21,6 +23,8 @@ from db import get_db, init_db
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+csrf = CSRFProtect(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -124,6 +128,8 @@ def login():
             _log(row['id'], 'LOGIN', f'{username} logged in')
             flash('Login berhasil!', 'success')
             nxt = request.args.get('next')
+            if nxt and urlparse(nxt).netloc != '':
+                nxt = None
             return redirect(nxt or url_for('dashboard'))
         flash('Username atau password salah.', 'danger')
     return render_template('login.html')
