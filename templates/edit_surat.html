@@ -68,7 +68,7 @@
         <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-sm" id="barangTable">
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                    <tr><th class="px-3 py-2 text-left w-10">No</th><th class="px-3 py-2 text-left">Nama Barang</th><th class="px-3 py-2 text-left w-24">Jumlah</th><th class="px-3 py-2 text-left w-28">Satuan</th><th class="px-3 py-2 text-left">Keterangan</th><th class="px-3 py-2 w-12"></th></tr>
+                    <tr><th class="px-3 py-2 text-left w-10">No</th><th class="px-3 py-2 text-left">Nama Barang</th><th class="px-3 py-2 text-left w-24">Jumlah</th><th class="px-3 py-2 text-left w-28">Satuan</th><th class="px-3 py-2 text-left">Keterangan</th><th class="px-3 py-2 text-left w-32">Foto Barang</th><th class="px-3 py-2 w-12"></th></tr>
                 </thead>
                 <tbody id="barangBody"></tbody>
             </table>
@@ -131,6 +131,10 @@ function addRow(d) {
             <option value="Unit" ${d.satuan==='Unit'?'selected':''}>Unit</option><option value="Set" ${d.satuan==='Set'?'selected':''}>Set</option><option value="Pcs" ${d.satuan==='Pcs'?'selected':''}>Pcs</option><option value="Dus" ${d.satuan==='Dus'?'selected':''}>Dus</option><option value="Lembar" ${d.satuan==='Lembar'?'selected':''}>Lembar</option><option value="Roll" ${d.satuan==='Roll'?'selected':''}>Roll</option><option value="Kg" ${d.satuan==='Kg'?'selected':''}>Kg</option><option value="Liter" ${d.satuan==='Liter'?'selected':''}>Liter</option>
         </select></td>
         <td class="px-3 py-2"><input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bk" value="${d.keterangan||''}"></td>
+        <td class="px-3 py-2">
+            ${d.foto && d.foto.length ? '<div class="flex gap-1 mb-1">' + d.foto.map(f => '<img src="/static/uploads/' + f + '" class="h-8 w-8 object-cover rounded border">').join('') + '</div>' : ''}
+            <input type="file" name="foto_barang_${rowNum-1}" accept="image/*" multiple class="text-xs w-full">
+        </td>
         <td class="px-3 py-2 text-center"><button type="button" onclick="removeRow(${rowNum})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>`;
     tbody.appendChild(tr);
     // Mobile card
@@ -144,13 +148,15 @@ function addRow(d) {
             <button type="button" onclick="removeRow(${rowNum})" class="text-red-500 hover:text-red-700 text-xs"><i class="fas fa-trash"></i></button>
         </div>
         <input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mb-2 mbn" value="${d.nama_barang||''}" placeholder="Nama Barang" required>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-3 gap-2 mb-2">
             <input type="number" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mbj" value="${d.jumlah||1}" min="1" placeholder="Jml" required>
             <select class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mbs">
                 <option value="Unit" ${d.satuan==='Unit'?'selected':''}>Unit</option><option value="Set" ${d.satuan==='Set'?'selected':''}>Set</option><option value="Pcs" ${d.satuan==='Pcs'?'selected':''}>Pcs</option><option value="Dus" ${d.satuan==='Dus'?'selected':''}>Dus</option><option value="Lembar" ${d.satuan==='Lembar'?'selected':''}>Lembar</option><option value="Roll" ${d.satuan==='Roll'?'selected':''}>Roll</option><option value="Kg" ${d.satuan==='Kg'?'selected':''}>Kg</option><option value="Liter" ${d.satuan==='Liter'?'selected':''}>Liter</option>
             </select>
             <input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mbk" value="${d.keterangan||''}" placeholder="Ket.">
-        </div>`;
+        </div>
+        ${d.foto && d.foto.length ? '<div class="flex gap-1 mb-1">' + d.foto.map(f => '<img src="/static/uploads/' + f + '" class="h-8 w-8 object-cover rounded border">').join('') + '</div>' : ''}
+        <input type="file" name="foto_barang_${rowNum-1}" accept="image/*" multiple class="text-xs w-full">`;
     mob.appendChild(card);
     sync();
 }

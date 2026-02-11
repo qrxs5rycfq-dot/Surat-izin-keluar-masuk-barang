@@ -30,6 +30,8 @@
                             <select name="role" onchange="this.form.submit()" class="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500">
                                 <option value="admin" {{ 'selected' if u.role=='admin' }}>Admin</option>
                                 <option value="manager" {{ 'selected' if u.role=='manager' }}>Manager</option>
+                                <option value="asman" {{ 'selected' if u.role=='asman' }}>Asman</option>
+                                <option value="satpam" {{ 'selected' if u.role=='satpam' }}>Satpam</option>
                                 <option value="staff" {{ 'selected' if u.role=='staff' }}>Staff</option>
                             </select>
                         </form>
@@ -79,6 +81,8 @@
                         <select name="role" onchange="this.form.submit()" class="text-[11px] border border-gray-300 rounded px-1 py-0.5 focus:ring-1 focus:ring-blue-500">
                             <option value="admin" {{ 'selected' if u.role=='admin' }}>Admin</option>
                             <option value="manager" {{ 'selected' if u.role=='manager' }}>Manager</option>
+                            <option value="asman" {{ 'selected' if u.role=='asman' }}>Asman</option>
+                            <option value="satpam" {{ 'selected' if u.role=='satpam' }}>Satpam</option>
                             <option value="staff" {{ 'selected' if u.role=='staff' }}>Staff</option>
                         </select>
                     </form>

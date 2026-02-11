@@ -78,7 +78,7 @@
 
 <p class="section-title">DAFTAR BARANG</p>
 <table class="barang-table">
-    <thead><tr><th style="width:6%">NO</th><th style="width:35%">NAMA BARANG</th><th style="width:12%">JUMLAH</th><th style="width:12%">SATUAN</th><th>KETERANGAN</th></tr></thead>
+    <thead><tr><th style="width:5%">NO</th><th style="width:25%">NAMA BARANG</th><th style="width:8%">JML</th><th style="width:8%">SATUAN</th><th style="width:18%">KETERANGAN</th><th style="width:18%">FOTO</th><th style="width:18%">CEK SATPAM</th></tr></thead>
     <tbody>
         {% for item in surat.barang_items %}
         <tr>
@@ -87,6 +87,20 @@
             <td style="text-align:center">{{ item.jumlah }}</td>
             <td style="text-align:center">{{ item.satuan }}</td>
             <td>{{ item.keterangan or '-' }}</td>
+            <td style="text-align:center">
+                {% if item.foto %}
+                {% for f in item.foto %}
+                <img src="file://{{ upload_dir }}/{{ f }}" style="max-height:40px;max-width:50px;border-radius:3px;margin:1px;" alt="">
+                {% endfor %}
+                {% else %}-{% endif %}
+            </td>
+            <td style="text-align:center">
+                {% if item.approval_satpam == 'sesuai' %}
+                <span style="color:#16a34a;font-weight:bold">✓ Sesuai</span>
+                {% elif item.approval_satpam == 'tidak_sesuai' %}
+                <span style="color:#dc2626;font-weight:bold">✗ Tidak</span>
+                {% else %}-{% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
