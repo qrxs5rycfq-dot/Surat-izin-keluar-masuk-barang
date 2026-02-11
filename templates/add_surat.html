@@ -204,7 +204,6 @@ function addRow(d) {
             <input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mbk" value="${d.keterangan||''}" placeholder="Ket.">
         </div>`;
     mob.appendChild(card);
-    syncMobile();
     sync();
 }
 
@@ -215,7 +214,6 @@ function removeRow(idx) {
     if (mc) mc.remove();
     renum();
     sync();
-    syncMobile();
 }
 
 function renum() {
@@ -225,41 +223,47 @@ function renum() {
 
 function sync() {
     const items = [];
-    // Desktop is the source of truth on sm+, mobile on <sm
-    const isMobile = window.innerWidth < 640;
-    if (isMobile) {
-        document.querySelectorAll('#barangMobile > div').forEach(c => {
-            items.push({
-                nama_barang: c.querySelector('.mbn').value,
-                jumlah: c.querySelector('.mbj').value,
-                satuan: c.querySelector('.mbs').value,
-                keterangan: c.querySelector('.mbk').value
-            });
+    document.querySelectorAll('#barangBody tr').forEach(tr => {
+        items.push({
+            nama_barang: tr.querySelector('.bn').value,
+            jumlah: tr.querySelector('.bj').value,
+            satuan: tr.querySelector('.bs').value,
+            keterangan: tr.querySelector('.bk').value
         });
-    } else {
-        document.querySelectorAll('#barangBody tr').forEach(tr => {
-            items.push({
-                nama_barang: tr.querySelector('.bn').value,
-                jumlah: tr.querySelector('.bj').value,
-                satuan: tr.querySelector('.bs').value,
-                keterangan: tr.querySelector('.bk').value
-            });
-        });
-    }
+    });
     document.getElementById('barangItems').value = JSON.stringify(items);
 }
 
-function syncMobile() {
-    // Keep both in sync when adding - initial values already match
+function syncDesktopToMobile(idx) {
+    const tr = document.querySelector(`#barangBody tr[data-idx="${idx}"]`);
+    const mc = document.querySelector(`#barangMobile div[data-idx="${idx}"]`);
+    if (!tr || !mc) return;
+    mc.querySelector('.mbn').value = tr.querySelector('.bn').value;
+    mc.querySelector('.mbj').value = tr.querySelector('.bj').value;
+    mc.querySelector('.mbs').value = tr.querySelector('.bs').value;
+    mc.querySelector('.mbk').value = tr.querySelector('.bk').value;
+}
+
+function syncMobileToDesktop(idx) {
+    const tr = document.querySelector(`#barangBody tr[data-idx="${idx}"]`);
+    const mc = document.querySelector(`#barangMobile div[data-idx="${idx}"]`);
+    if (!tr || !mc) return;
+    tr.querySelector('.bn').value = mc.querySelector('.mbn').value;
+    tr.querySelector('.bj').value = mc.querySelector('.mbj').value;
+    tr.querySelector('.bs').value = mc.querySelector('.mbs').value;
+    tr.querySelector('.bk').value = mc.querySelector('.mbk').value;
 }
 
 document.getElementById('suratForm').addEventListener('submit', function(e) {
-    const isMobile = window.innerWidth < 640;
-    const hasRows = isMobile ? document.querySelectorAll('#barangMobile > div').length : document.querySelectorAll('#barangBody tr').length;
-    if (!hasRows) { e.preventDefault(); alert('Tambahkan minimal 1 barang!'); return; }
+    if (!document.querySelectorAll('#barangBody tr').length) { e.preventDefault(); alert('Tambahkan minimal 1 barang!'); return; }
     sync();
 });
-document.addEventListener('input', function(e) { if (e.target.closest('#barangBody') || e.target.closest('#barangMobile')) sync(); });
+document.addEventListener('input', function(e) {
+    const tr = e.target.closest('#barangBody tr');
+    if (tr) { syncDesktopToMobile(tr.dataset.idx); sync(); return; }
+    const mc = e.target.closest('#barangMobile > div');
+    if (mc) { syncMobileToDesktop(mc.dataset.idx); sync(); }
+});
 document.addEventListener('DOMContentLoaded', function() { addRow(); });
 
 function previewFotos(input) {
