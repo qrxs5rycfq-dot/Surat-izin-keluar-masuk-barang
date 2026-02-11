@@ -9,40 +9,40 @@
 </div>
 
 <!-- Stat cards -->
-<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
-        <div class="bg-red-100 text-red-600 rounded-lg p-2.5 sm:p-3"><i class="fas fa-arrow-up text-lg sm:text-xl"></i></div>
-        <div>
-            <p class="text-xl sm:text-2xl font-bold">{{ total_keluar }}</p>
-            <p class="text-xs sm:text-sm text-gray-500">Surat Keluar</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border p-3 sm:p-5 flex items-center gap-2 sm:gap-4">
+        <div class="bg-red-100 text-red-600 rounded-lg p-2 sm:p-3 flex-shrink-0"><i class="fas fa-arrow-up text-base sm:text-xl"></i></div>
+        <div class="min-w-0">
+            <p class="text-lg sm:text-2xl font-bold">{{ total_keluar }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 truncate">Surat Keluar</p>
         </div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
-        <div class="bg-green-100 text-green-600 rounded-lg p-2.5 sm:p-3"><i class="fas fa-arrow-down text-lg sm:text-xl"></i></div>
-        <div>
-            <p class="text-xl sm:text-2xl font-bold">{{ total_masuk }}</p>
-            <p class="text-xs sm:text-sm text-gray-500">Surat Masuk</p>
+    <div class="bg-white rounded-xl shadow-sm border p-3 sm:p-5 flex items-center gap-2 sm:gap-4">
+        <div class="bg-green-100 text-green-600 rounded-lg p-2 sm:p-3 flex-shrink-0"><i class="fas fa-arrow-down text-base sm:text-xl"></i></div>
+        <div class="min-w-0">
+            <p class="text-lg sm:text-2xl font-bold">{{ total_masuk }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 truncate">Surat Masuk</p>
         </div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
-        <div class="bg-yellow-100 text-yellow-600 rounded-lg p-2.5 sm:p-3"><i class="fas fa-clock text-lg sm:text-xl"></i></div>
-        <div>
-            <p class="text-xl sm:text-2xl font-bold">{{ total_pending }}</p>
-            <p class="text-xs sm:text-sm text-gray-500">Pending</p>
+    <div class="bg-white rounded-xl shadow-sm border p-3 sm:p-5 flex items-center gap-2 sm:gap-4">
+        <div class="bg-yellow-100 text-yellow-600 rounded-lg p-2 sm:p-3 flex-shrink-0"><i class="fas fa-clock text-base sm:text-xl"></i></div>
+        <div class="min-w-0">
+            <p class="text-lg sm:text-2xl font-bold">{{ total_pending }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 truncate">Pending</p>
         </div>
     </div>
-    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
-        <div class="bg-blue-100 text-blue-600 rounded-lg p-2.5 sm:p-3"><i class="fas fa-search text-lg sm:text-xl"></i></div>
-        <div>
-            <p class="text-xl sm:text-2xl font-bold">{{ total_review }}</p>
-            <p class="text-xs sm:text-sm text-gray-500">Review</p>
+    <div class="bg-white rounded-xl shadow-sm border p-3 sm:p-5 flex items-center gap-2 sm:gap-4">
+        <div class="bg-blue-100 text-blue-600 rounded-lg p-2 sm:p-3 flex-shrink-0"><i class="fas fa-search text-base sm:text-xl"></i></div>
+        <div class="min-w-0">
+            <p class="text-lg sm:text-2xl font-bold">{{ total_review }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 truncate">Review</p>
         </div>
     </div>
-    <div class="col-span-2 lg:col-span-1 bg-white rounded-xl shadow-sm border p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
-        <div class="bg-emerald-100 text-emerald-600 rounded-lg p-2.5 sm:p-3"><i class="fas fa-check-circle text-lg sm:text-xl"></i></div>
-        <div>
-            <p class="text-xl sm:text-2xl font-bold">{{ total_approved }}</p>
-            <p class="text-xs sm:text-sm text-gray-500">Disetujui</p>
+    <div class="col-span-2 sm:col-span-1 bg-white rounded-xl shadow-sm border p-3 sm:p-5 flex items-center gap-2 sm:gap-4">
+        <div class="bg-emerald-100 text-emerald-600 rounded-lg p-2 sm:p-3 flex-shrink-0"><i class="fas fa-check-circle text-base sm:text-xl"></i></div>
+        <div class="min-w-0">
+            <p class="text-lg sm:text-2xl font-bold">{{ total_approved }}</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 truncate">Disetujui</p>
         </div>
     </div>
 </div>
@@ -79,37 +79,38 @@
 
 <!-- Recent -->
 <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-    <div class="px-5 py-4 border-b flex items-center justify-between">
+    <div class="px-4 sm:px-5 py-4 border-b flex items-center justify-between">
         <h3 class="font-semibold text-gray-700"><i class="fas fa-clock mr-2 text-blue-500"></i>Surat Terbaru</h3>
         <a href="{{ url_for('surat_list') }}" class="text-sm text-blue-600 hover:underline">Lihat Semua &rarr;</a>
     </div>
-    <div class="overflow-x-auto">
+    <!-- Desktop table -->
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                 <tr>
-                    <th class="px-5 py-3 text-left">No. Surat</th>
-                    <th class="px-5 py-3 text-left">Jenis</th>
-                    <th class="px-5 py-3 text-left">Nama</th>
-                    <th class="px-5 py-3 text-left">Divisi</th>
-                    <th class="px-5 py-3 text-left">Status</th>
-                    <th class="px-5 py-3 text-left">Tanggal</th>
-                    <th class="px-5 py-3"></th>
+                    <th class="px-4 py-3 text-left">No. Surat</th>
+                    <th class="px-4 py-3 text-left">Jenis</th>
+                    <th class="px-4 py-3 text-left">Nama</th>
+                    <th class="px-4 py-3 text-left">Divisi</th>
+                    <th class="px-4 py-3 text-left">Status</th>
+                    <th class="px-4 py-3 text-left">Tanggal</th>
+                    <th class="px-4 py-3"></th>
                 </tr>
             </thead>
             <tbody class="divide-y">
                 {% for s in recent %}
                 <tr class="hover:bg-gray-50">
-                    <td class="px-5 py-3 font-medium">{{ s.no_surat }}</td>
-                    <td class="px-5 py-3">
+                    <td class="px-4 py-3 font-medium">{{ s.no_surat }}</td>
+                    <td class="px-4 py-3">
                         {% if s.jenis == 'keluar' %}
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700"><i class="fas fa-arrow-up"></i> Keluar</span>
                         {% else %}
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-arrow-down"></i> Masuk</span>
                         {% endif %}
                     </td>
-                    <td class="px-5 py-3">{{ s.nama }}</td>
-                    <td class="px-5 py-3">{{ s.divisi }}</td>
-                    <td class="px-5 py-3">
+                    <td class="px-4 py-3">{{ s.nama }}</td>
+                    <td class="px-4 py-3">{{ s.divisi }}</td>
+                    <td class="px-4 py-3">
                         {% if s.status == 'approved' %}
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Disetujui</span>
                         {% elif s.status == 'rejected' %}
@@ -120,8 +121,8 @@
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">Pending</span>
                         {% endif %}
                     </td>
-                    <td class="px-5 py-3 text-gray-500">{{ s.tanggal }}</td>
-                    <td class="px-5 py-3">
+                    <td class="px-4 py-3 text-gray-500">{{ s.tanggal }}</td>
+                    <td class="px-4 py-3">
                         <a href="{{ url_for('view_surat', id=s.id) }}" class="text-blue-600 hover:underline text-xs">Detail</a>
                     </td>
                 </tr>
@@ -130,6 +131,36 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+    <!-- Mobile cards -->
+    <div class="md:hidden divide-y">
+        {% for s in recent %}
+        <a href="{{ url_for('view_surat', id=s.id) }}" class="block px-4 py-3 hover:bg-gray-50 transition">
+            <div class="flex items-center justify-between mb-1">
+                <span class="font-medium text-sm text-gray-800 truncate mr-2">{{ s.no_surat }}</span>
+                {% if s.jenis == 'keluar' %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700 flex-shrink-0"><i class="fas fa-arrow-up"></i> Keluar</span>
+                {% else %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 flex-shrink-0"><i class="fas fa-arrow-down"></i> Masuk</span>
+                {% endif %}
+            </div>
+            <div class="flex items-center justify-between text-xs text-gray-500">
+                <span>{{ s.nama }} &middot; {{ s.divisi }}</span>
+                {% if s.status == 'approved' %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">Disetujui</span>
+                {% elif s.status == 'rejected' %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700">Ditolak</span>
+                {% elif s.status == 'review' %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700">Review</span>
+                {% else %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-700">Pending</span>
+                {% endif %}
+            </div>
+            <p class="text-[10px] text-gray-400 mt-1">{{ s.tanggal }}</p>
+        </a>
+        {% else %}
+        <div class="px-4 py-8 text-center text-gray-400 text-sm">Belum ada surat.</div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

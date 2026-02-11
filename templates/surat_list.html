@@ -47,36 +47,37 @@
 
 <!-- Table -->
 <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-    <div class="overflow-x-auto">
+    <!-- Desktop table -->
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                 <tr>
-                    <th class="px-5 py-3 text-left">No. Surat</th>
-                    <th class="px-5 py-3 text-left">Jenis</th>
-                    <th class="px-5 py-3 text-left">Tanggal</th>
-                    <th class="px-5 py-3 text-left">Nama</th>
-                    <th class="px-5 py-3 text-left">Divisi</th>
-                    <th class="px-5 py-3 text-left">Perusahaan</th>
-                    <th class="px-5 py-3 text-left">Status</th>
-                    <th class="px-5 py-3 text-center">Aksi</th>
+                    <th class="px-4 py-3 text-left">No. Surat</th>
+                    <th class="px-4 py-3 text-left">Jenis</th>
+                    <th class="px-4 py-3 text-left">Tanggal</th>
+                    <th class="px-4 py-3 text-left">Nama</th>
+                    <th class="px-4 py-3 text-left">Divisi</th>
+                    <th class="px-4 py-3 text-left">Perusahaan</th>
+                    <th class="px-4 py-3 text-left">Status</th>
+                    <th class="px-4 py-3 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y">
                 {% for s in surat_list %}
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-5 py-3 font-medium text-gray-800">{{ s.no_surat }}</td>
-                    <td class="px-5 py-3">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ s.no_surat }}</td>
+                    <td class="px-4 py-3">
                         {% if s.jenis == 'keluar' %}
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700"><i class="fas fa-arrow-up"></i> Keluar</span>
                         {% else %}
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-arrow-down"></i> Masuk</span>
                         {% endif %}
                     </td>
-                    <td class="px-5 py-3 text-gray-500">{{ s.tanggal }}</td>
-                    <td class="px-5 py-3">{{ s.nama }}</td>
-                    <td class="px-5 py-3">{{ s.divisi }}</td>
-                    <td class="px-5 py-3">{{ s.perusahaan }}</td>
-                    <td class="px-5 py-3">
+                    <td class="px-4 py-3 text-gray-500">{{ s.tanggal }}</td>
+                    <td class="px-4 py-3">{{ s.nama }}</td>
+                    <td class="px-4 py-3">{{ s.divisi }}</td>
+                    <td class="px-4 py-3">{{ s.perusahaan }}</td>
+                    <td class="px-4 py-3">
                         {% if s.status == 'approved' %}
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Disetujui</span>
                         {% elif s.status == 'rejected' %}
@@ -87,7 +88,7 @@
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">Pending</span>
                         {% endif %}
                     </td>
-                    <td class="px-5 py-3">
+                    <td class="px-4 py-3">
                         <div class="flex items-center justify-center gap-2">
                             <a href="{{ url_for('view_surat', id=s.id) }}" class="text-blue-600 hover:text-blue-800" title="Lihat"><i class="fas fa-eye"></i></a>
                             <a href="{{ url_for('edit_surat', id=s.id) }}" class="text-yellow-600 hover:text-yellow-800" title="Edit"><i class="fas fa-edit"></i></a>
@@ -113,8 +114,59 @@
             </tbody>
         </table>
     </div>
+    <!-- Mobile cards -->
+    <div class="md:hidden divide-y">
+        {% for s in surat_list %}
+        <div class="px-4 py-3">
+            <div class="flex items-start justify-between gap-2 mb-2">
+                <div class="min-w-0">
+                    <p class="font-semibold text-sm text-gray-800 truncate">{{ s.no_surat }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ s.nama }} &middot; {{ s.perusahaan }}</p>
+                </div>
+                {% if s.jenis == 'keluar' %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700 flex-shrink-0"><i class="fas fa-arrow-up"></i> Keluar</span>
+                {% else %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 flex-shrink-0"><i class="fas fa-arrow-down"></i> Masuk</span>
+                {% endif %}
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <span>{{ s.divisi }}</span>
+                    <span>&middot;</span>
+                    <span>{{ s.tanggal }}</span>
+                    <span>&middot;</span>
+                    {% if s.status == 'approved' %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">Disetujui</span>
+                    {% elif s.status == 'rejected' %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700">Ditolak</span>
+                    {% elif s.status == 'review' %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700">Review</span>
+                    {% else %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-700">Pending</span>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{{ url_for('view_surat', id=s.id) }}" class="text-blue-600" title="Lihat"><i class="fas fa-eye text-sm"></i></a>
+                    <a href="{{ url_for('edit_surat', id=s.id) }}" class="text-yellow-600" title="Edit"><i class="fas fa-edit text-sm"></i></a>
+                    <a href="{{ url_for('export_pdf', id=s.id) }}" class="text-purple-600" title="PDF"><i class="fas fa-file-pdf text-sm"></i></a>
+                    {% if current_user.role in ('admin','manager') %}
+                    <a href="{{ url_for('delete_surat', id=s.id) }}" class="text-red-600" title="Hapus" onclick="return confirm('Hapus surat ini?')"><i class="fas fa-trash text-sm"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="px-4 py-12 text-center">
+            <div class="text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-3"></i>
+                <p class="text-lg font-medium">Belum ada surat</p>
+                <p class="text-sm mt-1">Buat surat baru untuk memulai</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
     {% if surat_list %}
-    <div class="px-5 py-3 border-t bg-gray-50 text-xs text-gray-500">
+    <div class="px-4 py-3 border-t bg-gray-50 text-xs text-gray-500">
         Menampilkan {{ surat_list|length }} surat
     </div>
     {% endif %}

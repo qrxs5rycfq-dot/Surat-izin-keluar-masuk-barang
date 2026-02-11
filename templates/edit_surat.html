@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800">
         <i class="fas fa-edit text-yellow-500 mr-2"></i>Edit Surat {{ surat.no_surat }}
     </h2>
 </div>
@@ -13,9 +13,9 @@
     <input type="hidden" name="jenis" value="{{ surat.jenis }}">
 
     <!-- Info Surat -->
-    <div class="bg-white rounded-xl shadow-sm border p-6">
+    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
         <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-file-alt text-blue-500"></i> Informasi Surat</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat</label>
                 <select name="jenis" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -47,24 +47,25 @@
     </div>
 
     <!-- Data Pemohon -->
-    <div class="bg-white rounded-xl shadow-sm border p-6">
+    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
         <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-user text-blue-500"></i> Data Pemohon</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label><input type="text" name="nama" value="{{ surat.nama }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1">Badge <span class="text-red-500">*</span></label><input type="text" name="badge" value="{{ surat.badge }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1">Perusahaan <span class="text-red-500">*</span></label><input type="text" name="perusahaan" value="{{ surat.perusahaan }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1">No. Kendaraan <span class="text-red-500">*</span></label><input type="text" name="no_kendaraan" value="{{ surat.no_kendaraan }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-            <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">No. SPK/MEMO <span class="text-red-500">*</span></label><input type="text" name="no_spk" value="{{ surat.no_spk }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
+            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">No. SPK/MEMO <span class="text-red-500">*</span></label><input type="text" name="no_spk" value="{{ surat.no_spk }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
         </div>
     </div>
 
     <!-- Daftar Barang -->
-    <div class="bg-white rounded-xl shadow-sm border p-6">
+    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold text-gray-700 flex items-center gap-2"><i class="fas fa-boxes text-blue-500"></i> Daftar Barang</h3>
             <button type="button" onclick="addRow()" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition"><i class="fas fa-plus"></i> Tambah</button>
         </div>
-        <div class="overflow-x-auto">
+        <!-- Desktop table -->
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-sm" id="barangTable">
                 <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                     <tr><th class="px-3 py-2 text-left w-10">No</th><th class="px-3 py-2 text-left">Nama Barang</th><th class="px-3 py-2 text-left w-24">Jumlah</th><th class="px-3 py-2 text-left w-28">Satuan</th><th class="px-3 py-2 text-left">Keterangan</th><th class="px-3 py-2 w-12"></th></tr>
@@ -72,39 +73,41 @@
                 <tbody id="barangBody"></tbody>
             </table>
         </div>
+        <!-- Mobile stacked -->
+        <div id="barangMobile" class="sm:hidden space-y-3"></div>
         <input type="hidden" name="barang_items" id="barangItems">
     </div>
 
     <!-- Lampiran Foto -->
-    <div class="bg-white rounded-xl shadow-sm border p-6">
+    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
         <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h3>
         {% if surat.foto_list %}
         <div class="mb-4">
             <p class="text-sm text-gray-500 mb-2">Foto saat ini ({{ surat.foto_list|length }} foto):</p>
             <div class="flex flex-wrap gap-3">
                 {% for foto in surat.foto_list %}
-                <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="max-h-48 rounded-lg shadow">
+                <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="max-h-32 sm:max-h-48 rounded-lg shadow">
                 {% endfor %}
             </div>
         </div>
         {% endif %}
-        <input type="file" name="lampiran_foto" accept="image/*" multiple class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+        <input type="file" name="lampiran_foto" accept="image/*" multiple class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 w-full">
         <p class="text-xs text-gray-400 mt-1">Pilih foto tambahan (bisa lebih dari satu). Foto lama tetap disimpan.</p>
     </div>
 
     <!-- Tanda Tangan -->
-    <div class="bg-white rounded-xl shadow-sm border p-6">
+    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
         <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-signature text-blue-500"></i> Tanda Tangan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div><label class="block text-sm font-medium text-gray-700 mb-1">Pemohon <span class="text-red-500">*</span></label><input type="text" name="pemohon" value="{{ surat.pemohon }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1">Diperiksa Oleh <span class="text-red-500">*</span></label><input type="text" name="diperiksa_oleh" value="{{ surat.diperiksa_oleh }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1">Disetujui Oleh <span class="text-red-500">*</span></label><input type="text" name="disetujui_oleh" value="{{ surat.disetujui_oleh }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
         </div>
     </div>
 
-    <div class="flex justify-between">
-        <a href="{{ url_for('view_surat', id=surat.id) }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-5 py-2.5 rounded-lg transition text-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
-        <button type="submit" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition text-sm shadow-lg shadow-blue-600/30"><i class="fas fa-save"></i> Simpan Perubahan</button>
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+        <a href="{{ url_for('view_surat', id=surat.id) }}" class="inline-flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-5 py-2.5 rounded-lg transition text-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <button type="submit" class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition text-sm shadow-lg shadow-blue-600/30"><i class="fas fa-save"></i> Simpan Perubahan</button>
     </div>
 </form>
 {% endblock %}
@@ -115,9 +118,11 @@ let rowNum = 0;
 function addRow(d) {
     d = d || {};
     rowNum++;
+    // Desktop table row
     const tbody = document.getElementById('barangBody');
     const tr = document.createElement('tr');
     tr.className = 'border-t';
+    tr.dataset.idx = rowNum;
     tr.innerHTML = `
         <td class="px-3 py-2 text-center rnum">${rowNum}</td>
         <td class="px-3 py-2"><input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bn" value="${d.nama_barang||''}" required></td>
@@ -126,14 +131,61 @@ function addRow(d) {
             <option value="Unit" ${d.satuan==='Unit'?'selected':''}>Unit</option><option value="Set" ${d.satuan==='Set'?'selected':''}>Set</option><option value="Pcs" ${d.satuan==='Pcs'?'selected':''}>Pcs</option><option value="Dus" ${d.satuan==='Dus'?'selected':''}>Dus</option><option value="Lembar" ${d.satuan==='Lembar'?'selected':''}>Lembar</option><option value="Roll" ${d.satuan==='Roll'?'selected':''}>Roll</option><option value="Kg" ${d.satuan==='Kg'?'selected':''}>Kg</option><option value="Liter" ${d.satuan==='Liter'?'selected':''}>Liter</option>
         </select></td>
         <td class="px-3 py-2"><input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bk" value="${d.keterangan||''}"></td>
-        <td class="px-3 py-2 text-center"><button type="button" onclick="this.closest('tr').remove();renum();sync();" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>`;
+        <td class="px-3 py-2 text-center"><button type="button" onclick="removeRow(${rowNum})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button></td>`;
     tbody.appendChild(tr);
+    // Mobile card
+    const mob = document.getElementById('barangMobile');
+    const card = document.createElement('div');
+    card.className = 'bg-gray-50 rounded-lg p-3 border';
+    card.dataset.idx = rowNum;
+    card.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-gray-500">Barang #<span class="mnum">${rowNum}</span></span>
+            <button type="button" onclick="removeRow(${rowNum})" class="text-red-500 hover:text-red-700 text-xs"><i class="fas fa-trash"></i></button>
+        </div>
+        <input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mb-2 mbn" value="${d.nama_barang||''}" placeholder="Nama Barang" required>
+        <div class="grid grid-cols-3 gap-2">
+            <input type="number" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mbj" value="${d.jumlah||1}" min="1" placeholder="Jml" required>
+            <select class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mbs">
+                <option value="Unit" ${d.satuan==='Unit'?'selected':''}>Unit</option><option value="Set" ${d.satuan==='Set'?'selected':''}>Set</option><option value="Pcs" ${d.satuan==='Pcs'?'selected':''}>Pcs</option><option value="Dus" ${d.satuan==='Dus'?'selected':''}>Dus</option><option value="Lembar" ${d.satuan==='Lembar'?'selected':''}>Lembar</option><option value="Roll" ${d.satuan==='Roll'?'selected':''}>Roll</option><option value="Kg" ${d.satuan==='Kg'?'selected':''}>Kg</option><option value="Liter" ${d.satuan==='Liter'?'selected':''}>Liter</option>
+            </select>
+            <input type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm mbk" value="${d.keterangan||''}" placeholder="Ket.">
+        </div>`;
+    mob.appendChild(card);
     sync();
 }
-function renum(){document.querySelectorAll('#barangBody tr').forEach((tr,i)=>{tr.querySelector('.rnum').textContent=i+1;});}
-function sync(){const items=[];document.querySelectorAll('#barangBody tr').forEach(tr=>{items.push({nama_barang:tr.querySelector('.bn').value,jumlah:tr.querySelector('.bj').value,satuan:tr.querySelector('.bs').value,keterangan:tr.querySelector('.bk').value});});document.getElementById('barangItems').value=JSON.stringify(items);}
-document.getElementById('suratForm').addEventListener('submit',function(e){if(!document.querySelectorAll('#barangBody tr').length){e.preventDefault();alert('Tambahkan minimal 1 barang!');return;}sync();});
-document.addEventListener('input',function(e){if(e.target.closest('#barangBody'))sync();});
+function removeRow(idx) {
+    const tr = document.querySelector(`#barangBody tr[data-idx="${idx}"]`);
+    const mc = document.querySelector(`#barangMobile div[data-idx="${idx}"]`);
+    if (tr) tr.remove();
+    if (mc) mc.remove();
+    renum(); sync();
+}
+function renum(){
+    document.querySelectorAll('#barangBody tr').forEach((tr,i)=>{tr.querySelector('.rnum').textContent=i+1;});
+    document.querySelectorAll('#barangMobile > div').forEach((c,i)=>{const m=c.querySelector('.mnum');if(m)m.textContent=i+1;});
+}
+function sync(){
+    const items=[];
+    const isMobile = window.innerWidth < 640;
+    if (isMobile) {
+        document.querySelectorAll('#barangMobile > div').forEach(c=>{
+            items.push({nama_barang:c.querySelector('.mbn').value,jumlah:c.querySelector('.mbj').value,satuan:c.querySelector('.mbs').value,keterangan:c.querySelector('.mbk').value});
+        });
+    } else {
+        document.querySelectorAll('#barangBody tr').forEach(tr=>{
+            items.push({nama_barang:tr.querySelector('.bn').value,jumlah:tr.querySelector('.bj').value,satuan:tr.querySelector('.bs').value,keterangan:tr.querySelector('.bk').value});
+        });
+    }
+    document.getElementById('barangItems').value=JSON.stringify(items);
+}
+document.getElementById('suratForm').addEventListener('submit',function(e){
+    const isMobile = window.innerWidth < 640;
+    const hasRows = isMobile ? document.querySelectorAll('#barangMobile > div').length : document.querySelectorAll('#barangBody tr').length;
+    if(!hasRows){e.preventDefault();alert('Tambahkan minimal 1 barang!');return;}
+    sync();
+});
+document.addEventListener('input',function(e){if(e.target.closest('#barangBody') || e.target.closest('#barangMobile'))sync();});
 document.addEventListener('DOMContentLoaded',function(){
     const existing = {{ surat.barang_items | tojson }};
     if(existing.length){existing.forEach(d=>addRow(d));}else{addRow();}

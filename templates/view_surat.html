@@ -9,16 +9,16 @@
         <p class="text-gray-500 text-sm mt-1">{{ surat.no_surat }}</p>
     </div>
     <div class="flex flex-wrap gap-2">
-        <a href="{{ url_for('surat_list') }}" class="inline-flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-arrow-left"></i> Kembali</a>
-        <a href="{{ url_for('edit_surat', id=surat.id) }}" class="inline-flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-edit"></i> Edit</a>
-        <a href="{{ url_for('export_pdf', id=surat.id) }}" class="inline-flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-file-pdf"></i> PDF</a>
-        <button onclick="window.print()" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-print"></i> Print</button>
+        <a href="{{ url_for('surat_list') }}" class="inline-flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg transition"><i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Kembali</span></a>
+        <a href="{{ url_for('edit_surat', id=surat.id) }}" class="inline-flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg transition"><i class="fas fa-edit"></i> <span class="hidden sm:inline">Edit</span></a>
+        <a href="{{ url_for('export_pdf', id=surat.id) }}" class="inline-flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg transition"><i class="fas fa-file-pdf"></i> <span class="hidden sm:inline">PDF</span></a>
+        <button onclick="window.print()" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg transition"><i class="fas fa-print"></i> <span class="hidden sm:inline">Print</span></button>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Main info -->
-    <div class="lg:col-span-2 space-y-6">
+    <div class="md:col-span-2 space-y-6">
         <!-- Surat header card -->
         <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
             <div class="px-6 py-4 border-b {{ 'bg-red-50' if surat.jenis=='keluar' else 'bg-green-50' }} flex items-center justify-between">
@@ -83,7 +83,7 @@
         <!-- Tanda tangan -->
         <div class="bg-white rounded-xl shadow-sm border p-6">
             <h4 class="font-semibold text-gray-700 mb-6 flex items-center gap-2"><i class="fas fa-signature text-blue-500"></i> Tanda Tangan</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center text-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-center text-sm">
                 <div class="border rounded-lg p-4">
                     <p class="text-xs text-gray-400 uppercase mb-8">Pemohon</p>
                     <div class="border-t pt-3"><p class="font-semibold">{{ surat.pemohon }}</p></div>
