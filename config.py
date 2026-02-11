@@ -1,38 +1,30 @@
 import os
-from datetime import datetime
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-123-change-this-in-production'
-    
-    # Database configuration for Mac - PASTIKAN INI BENAR!
-    MYSQL_HOST = '127.0.0.1'  # Gunakan IP, bukan 'localhost' untuk menghindari socket issues
-    MYSQL_USER = 'root'        # atau user lain yang sudah dibuat
-    MYSQL_PASSWORD = 'password123'  # Password MySQL Anda
-    MYSQL_DB = 'surat_izin_db'
-    MYSQL_CURSORCLASS = 'DictCursor'
-    MYSQL_PORT = 3306  # Tambahkan port secara eksplisit
-    
-    # PDF configuration
-    PDF_DIR = 'static/pdfs'
-    
-    # Application settings
-    APP_NAME = 'Sistem Surat Izin Keluar Barang'
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+    # MySQL configuration
+    MYSQL_HOST = os.environ.get('MYSQL_HOST', '127.0.0.1')
+    MYSQL_PORT = int(os.environ.get('MYSQL_PORT', 3306))
+    MYSQL_USER = os.environ.get('MYSQL_USER', 'root')
+    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', 'password123')
+    MYSQL_DB = os.environ.get('MYSQL_DB', 'surat_izin_db')
+
+    PDF_DIR = os.path.join(BASE_DIR, 'static', 'pdfs')
+    UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploads')
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    APP_NAME = 'Sistem Surat Izin Keluar Masuk Barang'
     COMPANY_NAME = 'PT PLN INDONESIA POWER'
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
-    
+    COMPANY_SUB = 'UBP Jawa Tengah 2 Adipala'
+    SYSTEM_NAME = 'Indonesia Power Integrated Management System'
+    DOC_NO = 'ADP.17.01.015'
+    DOC_REV = '2'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
     @staticmethod
     def init_app(app):
-        # Create necessary directories
-        directories = [Config.PDF_DIR, 'static/uploads', 'logs']
-        for directory in directories:
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-                print(f"📁 Created directory: {directory}")
-        
-        # Log initialization
-        print(f"🚀 {Config.APP_NAME}")
-        print(f"🏢 {Config.COMPANY_NAME}")
-        print(f"📊 Database: {Config.MYSQL_DB}@{Config.MYSQL_HOST}:{Config.MYSQL_PORT}")
-        print(f"📁 PDF Directory: {Config.PDF_DIR}")
-
-config = Config()
+        for d in [Config.PDF_DIR, Config.UPLOAD_DIR]:
+            os.makedirs(d, exist_ok=True)
