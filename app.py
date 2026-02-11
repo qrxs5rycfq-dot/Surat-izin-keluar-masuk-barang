@@ -504,9 +504,15 @@ def export_excel():
             cell.border = thin_border
             cell.alignment = Alignment(horizontal='center' if col in (1, 2, 8) else 'left')
 
-    for col in ws.columns:
-        max_len = max((len(str(c.value or '')) for c in col), default=10)
-        ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 40)
+    from openpyxl.utils import get_column_letter
+    for col_idx in range(1, len(headers) + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 10
+        for row_cells in ws.iter_rows(min_col=col_idx, max_col=col_idx, min_row=4):
+            for cell in row_cells:
+                if cell.value is not None:
+                    max_len = max(max_len, len(str(cell.value)))
+        ws.column_dimensions[col_letter].width = min(max_len + 4, 40)
 
     buf = io.BytesIO()
     wb.save(buf)
