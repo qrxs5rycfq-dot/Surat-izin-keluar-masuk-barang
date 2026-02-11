@@ -27,6 +27,22 @@
         #sidebarOverlay { transition: opacity 0.3s ease; }
         /* Notification dropdown */
         .notif-dropdown { max-height: 400px; overflow-y: auto; }
+        /* Notification bell animation */
+        @keyframes bellSwing {
+            0%, 100% { transform: rotate(0deg); }
+            15% { transform: rotate(14deg); }
+            30% { transform: rotate(-12deg); }
+            45% { transform: rotate(8deg); }
+            60% { transform: rotate(-6deg); }
+            75% { transform: rotate(2deg); }
+        }
+        @keyframes pulseRing {
+            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+        .notif-btn:hover .notif-icon { animation: bellSwing 0.8s ease; }
+        .notif-badge-pulse { animation: pulseRing 1.5s infinite; }
     </style>
     {% block head %}{% endblock %}
 </head>
@@ -122,26 +138,29 @@
                     </button>
                     <span class="font-bold text-blue-800 text-sm lg:hidden">IPIMS</span>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <!-- Notification bell -->
                     <div class="relative" id="notifBell">
-                        <button onclick="toggleNotifDropdown()" class="relative text-gray-600 hover:text-gray-800 p-1">
-                            <i class="fas fa-bell text-lg"></i>
+                        <button onclick="toggleNotifDropdown()" class="notif-btn relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-blue-100 border border-gray-200 hover:border-blue-300 transition-all duration-200 shadow-sm hover:shadow-md group">
+                            <i class="fas fa-bell text-lg notif-icon text-gray-500 group-hover:text-blue-600 transition-colors"></i>
                             {% if notif_count > 0 %}
-                            <span id="notifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{{ notif_count }}</span>
+                            <span id="notifBadge" class="notif-badge-pulse absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 ring-2 ring-white shadow-lg">{{ notif_count }}</span>
                             {% endif %}
                         </button>
                         <!-- Dropdown -->
-                        <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border z-50">
-                            <div class="px-4 py-3 border-b flex items-center justify-between">
-                                <h4 class="font-semibold text-sm text-gray-800">Notifikasi</h4>
-                                <button onclick="markAllRead()" class="text-xs text-blue-600 hover:underline">Tandai semua dibaca</button>
+                        <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+                            <div class="px-5 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-bell text-white/80 text-sm"></i>
+                                    <h4 class="font-semibold text-sm text-white">Notifikasi</h4>
+                                </div>
+                                <button onclick="markAllRead()" class="text-xs text-blue-100 hover:text-white transition-colors font-medium">Tandai semua dibaca</button>
                             </div>
-                            <div id="notifList" class="notif-dropdown divide-y">
-                                <div class="px-4 py-6 text-center text-gray-400 text-sm">Memuat...</div>
+                            <div id="notifList" class="notif-dropdown divide-y divide-gray-50">
+                                <div class="px-4 py-8 text-center text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-1"></i> Memuat...</div>
                             </div>
-                            <div class="px-4 py-2 border-t text-center">
-                                <a href="{{ url_for('notifications_page') }}" class="text-xs text-blue-600 hover:underline">Lihat Semua Notifikasi</a>
+                            <div class="px-4 py-2.5 border-t bg-gray-50 text-center">
+                                <a href="{{ url_for('notifications_page') }}" class="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"><i class="fas fa-external-link-alt mr-1"></i> Lihat Semua Notifikasi</a>
                             </div>
                         </div>
                     </div>
@@ -231,20 +250,23 @@ function loadNotifications() {
         .then(data => {
             const list = document.getElementById('notifList');
             if (!data.length) {
-                list.innerHTML = '<div class="px-4 py-6 text-center text-gray-400 text-sm"><i class="fas fa-bell-slash text-2xl mb-2"></i><p>Belum ada notifikasi</p></div>';
+                list.innerHTML = '<div class="px-4 py-10 text-center text-gray-400 text-sm"><div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3"><i class="fas fa-bell-slash text-xl text-gray-300"></i></div><p class="font-medium text-gray-500">Tidak ada notifikasi</p><p class="text-xs text-gray-400 mt-1">Anda akan melihat pemberitahuan di sini</p></div>';
                 return;
             }
             list.innerHTML = data.map(n => `
-                <a href="${n.link || '#'}" onclick="markRead(${n.id})" class="block px-4 py-3 hover:bg-gray-50 transition ${n.is_read ? 'opacity-60' : ''}">
-                    <div class="flex items-start gap-3">
-                        <div class="flex-shrink-0 mt-0.5">
-                            <div class="w-2 h-2 rounded-full ${n.is_read ? 'bg-gray-300' : 'bg-blue-500'}"></div>
+                <a href="${n.link || '#'}" onclick="markRead(${n.id})" class="flex items-start gap-3 px-4 py-3.5 hover:bg-blue-50/50 transition-colors ${n.is_read ? 'opacity-50' : ''}">
+                    <div class="flex-shrink-0 mt-0.5">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center ${n.is_read ? 'bg-gray-100' : 'bg-gradient-to-br from-blue-500 to-indigo-500'}">
+                            <i class="fas fa-file-alt text-sm ${n.is_read ? 'text-gray-400' : 'text-white'}"></i>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-800 truncate">${n.title}</p>
-                            <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">${n.message}</p>
-                            <p class="text-xs text-gray-400 mt-1">${n.created_at || ''}</p>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <p class="text-sm font-semibold text-gray-800 truncate">${n.title}</p>
+                            ${!n.is_read ? '<span class="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500"></span>' : ''}
                         </div>
+                        <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">${n.message}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 flex items-center gap-1"><i class="far fa-clock"></i> ${n.created_at || ''}</p>
                     </div>
                 </a>
             `).join('');
