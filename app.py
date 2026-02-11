@@ -460,7 +460,7 @@ def edit_surat(id):
 
 @app.route('/surat/<int:id>/status', methods=['POST'])
 @login_required
-@role_required('admin', 'manager', 'satpam', 'asman')
+@role_required('admin')
 def update_status(id):
     new_status = request.form.get('status')
     catatan = request.form.get('catatan', '')
@@ -510,7 +510,10 @@ def approve_surat(id):
             flash('Keputusan tidak valid.', 'danger')
             return redirect(url_for('view_surat', id=id))
         # Save per-item approvals from form
-        barang_items = json.loads(surat['barang_items']) if surat['barang_items'] else []
+        try:
+            barang_items = json.loads(surat['barang_items']) if surat['barang_items'] else []
+        except (json.JSONDecodeError, TypeError):
+            barang_items = []
         for i, item in enumerate(barang_items):
             item_approval = request.form.get(f'item_approval_{i}', 'pending')
             item['approval_satpam'] = item_approval

@@ -157,7 +157,7 @@
                         {% if surat.approval_satpam_note %}<p class="text-xs text-gray-500 mt-0.5 italic">"{{ surat.approval_satpam_note }}"</p>{% endif %}
                     </div>
                 </div>
-                <div class="ml-4 border-l-2 {{ 'border-green-300' if surat.approval_satpam in ('sesuai',) else 'border-gray-200' }} h-4"></div>
+                <div class="ml-4 border-l-2 {{ 'border-green-300' if surat.approval_satpam == 'sesuai' else 'border-gray-200' }} h-4"></div>
                 <!-- Step 2: Asman Umum -->
                 <div class="flex items-start gap-3">
                     <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
