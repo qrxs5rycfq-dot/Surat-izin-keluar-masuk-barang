@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     nama_lengkap VARCHAR(100) NOT NULL,
-    role ENUM('admin','staff','manager') NOT NULL DEFAULT 'staff',
+    role ENUM('admin','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff',
     divisi VARCHAR(50),
     is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -66,6 +66,20 @@ CREATE TABLE IF NOT EXISTS surat_izin (
     -- Status persetujuan
     status ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending',
     catatan TEXT,
+
+    -- Multi-stage approval
+    approval_satpam ENUM('pending','sesuai','tidak_sesuai') DEFAULT 'pending',
+    approval_satpam_by INT,
+    approval_satpam_at TIMESTAMP NULL,
+    approval_satpam_note TEXT,
+    approval_asman ENUM('pending','approved','rejected') DEFAULT 'pending',
+    approval_asman_by INT,
+    approval_asman_at TIMESTAMP NULL,
+    approval_asman_note TEXT,
+    approval_manager ENUM('pending','approved','rejected') DEFAULT 'pending',
+    approval_manager_by INT,
+    approval_manager_at TIMESTAMP NULL,
+    approval_manager_note TEXT,
 
     -- Relasi ke user pembuat
     created_by INT,

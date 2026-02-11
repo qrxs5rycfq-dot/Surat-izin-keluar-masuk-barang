@@ -60,7 +60,7 @@ def init_db():
         username VARCHAR(50) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         nama_lengkap VARCHAR(100) NOT NULL,
-        role ENUM('admin','staff','manager') NOT NULL DEFAULT 'staff',
+        role ENUM('admin','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff',
         divisi VARCHAR(50),
         is_active TINYINT(1) DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -88,6 +88,18 @@ def init_db():
         lampiran_foto TEXT,
         status ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending',
         catatan TEXT,
+        approval_satpam ENUM('pending','sesuai','tidak_sesuai') DEFAULT 'pending',
+        approval_satpam_by INT,
+        approval_satpam_at TIMESTAMP NULL,
+        approval_satpam_note TEXT,
+        approval_asman ENUM('pending','approved','rejected') DEFAULT 'pending',
+        approval_asman_by INT,
+        approval_asman_at TIMESTAMP NULL,
+        approval_asman_note TEXT,
+        approval_manager ENUM('pending','approved','rejected') DEFAULT 'pending',
+        approval_manager_by INT,
+        approval_manager_at TIMESTAMP NULL,
+        approval_manager_note TEXT,
         created_by INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -147,6 +159,18 @@ def init_db():
         ('catatan',         "TEXT AFTER `status`"),
         ('created_by',      "INT AFTER `catatan`"),
         ('updated_at',      "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`"),
+        ('approval_satpam',      "ENUM('pending','sesuai','tidak_sesuai') DEFAULT 'pending' AFTER `catatan`"),
+        ('approval_satpam_by',   "INT AFTER `approval_satpam`"),
+        ('approval_satpam_at',   "TIMESTAMP NULL AFTER `approval_satpam_by`"),
+        ('approval_satpam_note', "TEXT AFTER `approval_satpam_at`"),
+        ('approval_asman',       "ENUM('pending','approved','rejected') DEFAULT 'pending' AFTER `approval_satpam_note`"),
+        ('approval_asman_by',    "INT AFTER `approval_asman`"),
+        ('approval_asman_at',    "TIMESTAMP NULL AFTER `approval_asman_by`"),
+        ('approval_asman_note',  "TEXT AFTER `approval_asman_at`"),
+        ('approval_manager',     "ENUM('pending','approved','rejected') DEFAULT 'pending' AFTER `approval_asman_note`"),
+        ('approval_manager_by',  "INT AFTER `approval_manager`"),
+        ('approval_manager_at',  "TIMESTAMP NULL AFTER `approval_manager_by`"),
+        ('approval_manager_note',"TEXT AFTER `approval_manager_at`"),
     ])
 
     # Ensure status ENUM includes 'review' for existing tables
@@ -154,6 +178,15 @@ def init_db():
         cur.execute(
             "ALTER TABLE `surat_izin` MODIFY COLUMN `status` "
             "ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending'"
+        )
+    except Exception:
+        pass
+
+    # Ensure users role ENUM includes satpam and asman
+    try:
+        cur.execute(
+            "ALTER TABLE `users` MODIFY COLUMN `role` "
+            "ENUM('admin','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff'"
         )
     except Exception:
         pass
@@ -180,6 +213,16 @@ def init_db():
         cur.execute(
             "INSERT INTO users (username,password,nama_lengkap,role,divisi) VALUES (%s,%s,%s,%s,%s)",
             ('manager01', pw3, 'Manager Administrasi', 'manager', 'ADMINISTRASI'),
+        )
+        pw4 = bcrypt.hashpw(b'satpam123', bcrypt.gensalt()).decode()
+        cur.execute(
+            "INSERT INTO users (username,password,nama_lengkap,role,divisi) VALUES (%s,%s,%s,%s,%s)",
+            ('satpam01', pw4, 'Satpam Security', 'satpam', 'KEAMANAN'),
+        )
+        pw5 = bcrypt.hashpw(b'asman123', bcrypt.gensalt()).decode()
+        cur.execute(
+            "INSERT INTO users (username,password,nama_lengkap,role,divisi) VALUES (%s,%s,%s,%s,%s)",
+            ('asman01', pw5, 'Asman Umum', 'asman', 'UMUM'),
         )
 
     # Seed sample surat if empty

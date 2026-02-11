@@ -302,6 +302,19 @@ def add_surat():
             flash('Format data barang tidak valid!', 'danger')
             return redirect(url_for('add_surat'))
 
+        # Handle per-item photo uploads
+        for i, item in enumerate(barang):
+            item_fotos = request.files.getlist(f'foto_barang_{i}')
+            item_foto_names = []
+            for foto in item_fotos:
+                if foto and foto.filename and allowed_file(foto.filename):
+                    ext = foto.filename.rsplit('.', 1)[1].lower()
+                    fname = f"{uuid.uuid4().hex}.{ext}"
+                    foto.save(os.path.join(Config.UPLOAD_DIR, fname))
+                    item_foto_names.append(fname)
+            if item_foto_names:
+                item['foto'] = item_foto_names
+
         conn = get_db()
         sid = _exec(conn, """
             INSERT INTO surat_izin
@@ -391,6 +404,21 @@ def edit_surat(id):
             flash('Format data barang tidak valid!', 'danger')
             return redirect(url_for('edit_surat', id=id))
 
+        # Handle per-item photo uploads
+        for i, item in enumerate(barang):
+            item_fotos = request.files.getlist(f'foto_barang_{i}')
+            item_foto_names = item.get('foto', [])
+            if not isinstance(item_foto_names, list):
+                item_foto_names = []
+            for foto in item_fotos:
+                if foto and foto.filename and allowed_file(foto.filename):
+                    ext = foto.filename.rsplit('.', 1)[1].lower()
+                    fname = f"{uuid.uuid4().hex}.{ext}"
+                    foto.save(os.path.join(Config.UPLOAD_DIR, fname))
+                    item_foto_names.append(fname)
+            if item_foto_names:
+                item['foto'] = item_foto_names
+
         _exec(conn, """
             UPDATE surat_izin SET
               jenis=%s,no_surat=%s,tanggal=%s,tgl_terbit=%s,divisi=%s,nama=%s,badge=%s,
@@ -432,7 +460,7 @@ def edit_surat(id):
 
 @app.route('/surat/<int:id>/status', methods=['POST'])
 @login_required
-@role_required('admin', 'manager')
+@role_required('admin', 'manager', 'satpam', 'asman')
 def update_status(id):
     new_status = request.form.get('status')
     catatan = request.form.get('catatan', '')
@@ -457,6 +485,89 @@ def update_status(id):
                 f'/surat/{id}')
 
     flash(f'Status surat diubah menjadi {new_status}.', 'success')
+    return redirect(url_for('view_surat', id=id))
+
+
+@app.route('/surat/<int:id>/approve', methods=['POST'])
+@login_required
+def approve_surat(id):
+    """Multi-stage approval: Satpam -> Asman Umum -> Manager Administrasi"""
+    stage = request.form.get('stage')
+    decision = request.form.get('decision')
+    note = request.form.get('note', '')
+
+    conn = get_db()
+    surat = _q(conn, "SELECT * FROM surat_izin WHERE id=%s", (id,), one=True)
+    if not surat:
+        conn.close()
+        flash('Surat tidak ditemukan.', 'danger')
+        return redirect(url_for('surat_list'))
+
+    if stage == 'satpam':
+        if current_user.role not in ('satpam', 'admin'):
+            abort(403)
+        if decision not in ('sesuai', 'tidak_sesuai'):
+            flash('Keputusan tidak valid.', 'danger')
+            return redirect(url_for('view_surat', id=id))
+        # Save per-item approvals from form
+        barang_items = json.loads(surat['barang_items']) if surat['barang_items'] else []
+        for i, item in enumerate(barang_items):
+            item_approval = request.form.get(f'item_approval_{i}', 'pending')
+            item['approval_satpam'] = item_approval
+        _exec(conn, """UPDATE surat_izin SET
+            approval_satpam=%s, approval_satpam_by=%s, approval_satpam_at=NOW(),
+            approval_satpam_note=%s, barang_items=%s, status='review'
+            WHERE id=%s""",
+            (decision, current_user.id, note, json.dumps(barang_items, ensure_ascii=False), id))
+        label = 'Sesuai' if decision == 'sesuai' else 'Tidak Sesuai'
+        _log(current_user.id, 'APPROVE', f'Satpam: Surat #{id} \u2192 {label}')
+        # Notify asman users
+        asmans = _q(conn, "SELECT id FROM users WHERE role IN ('asman','admin') AND is_active=1")
+        for a in asmans:
+            if a['id'] != current_user.id:
+                _notify(a['id'], 'Perlu Review Asman', f'Surat {surat["no_surat"]} sudah diperiksa Satpam ({label})', f'/surat/{id}')
+    elif stage == 'asman':
+        if current_user.role not in ('asman', 'admin'):
+            abort(403)
+        if decision not in ('approved', 'rejected'):
+            flash('Keputusan tidak valid.', 'danger')
+            return redirect(url_for('view_surat', id=id))
+        _exec(conn, """UPDATE surat_izin SET
+            approval_asman=%s, approval_asman_by=%s, approval_asman_at=NOW(),
+            approval_asman_note=%s
+            WHERE id=%s""",
+            (decision, current_user.id, note, id))
+        label = 'Disetujui' if decision == 'approved' else 'Ditolak'
+        _log(current_user.id, 'APPROVE', f'Asman: Surat #{id} \u2192 {label}')
+        # Notify managers
+        managers = _q(conn, "SELECT id FROM users WHERE role IN ('manager','admin') AND is_active=1")
+        for m in managers:
+            if m['id'] != current_user.id:
+                _notify(m['id'], 'Perlu Approval Manager', f'Surat {surat["no_surat"]} sudah direview Asman ({label})', f'/surat/{id}')
+    elif stage == 'manager':
+        if current_user.role not in ('manager', 'admin'):
+            abort(403)
+        if decision not in ('approved', 'rejected'):
+            flash('Keputusan tidak valid.', 'danger')
+            return redirect(url_for('view_surat', id=id))
+        final_status = decision
+        _exec(conn, """UPDATE surat_izin SET
+            approval_manager=%s, approval_manager_by=%s, approval_manager_at=NOW(),
+            approval_manager_note=%s, status=%s
+            WHERE id=%s""",
+            (decision, current_user.id, note, final_status, id))
+        label = 'Disetujui' if decision == 'approved' else 'Ditolak'
+        _log(current_user.id, 'APPROVE', f'Manager: Surat #{id} \u2192 {label}')
+        # Notify creator
+        if surat.get('created_by'):
+            _notify(surat['created_by'], 'Surat Final', f'Surat {surat["no_surat"]} telah {label} oleh Manager', f'/surat/{id}')
+    else:
+        flash('Stage tidak valid.', 'danger')
+        conn.close()
+        return redirect(url_for('view_surat', id=id))
+
+    conn.close()
+    flash('Approval berhasil disimpan.', 'success')
     return redirect(url_for('view_surat', id=id))
 
 
@@ -646,7 +757,7 @@ def toggle_user(uid):
 @role_required('admin')
 def change_role(uid):
     new_role = request.form.get('role')
-    if new_role not in ('admin', 'staff', 'manager'):
+    if new_role not in ('admin', 'staff', 'manager', 'satpam', 'asman'):
         flash('Role tidak valid.', 'danger')
         return redirect(url_for('user_list'))
     conn = get_db()
@@ -734,7 +845,7 @@ def _notify_all_admins(title, message, link=None, exclude_user=None):
     """Send notification to all admin and manager users."""
     try:
         conn = get_db()
-        admins = _q(conn, "SELECT id FROM users WHERE role IN ('admin','manager') AND is_active=1")
+        admins = _q(conn, "SELECT id FROM users WHERE role IN ('admin','manager','satpam','asman') AND is_active=1")
         for a in admins:
             if exclude_user and a['id'] == exclude_user:
                 continue
