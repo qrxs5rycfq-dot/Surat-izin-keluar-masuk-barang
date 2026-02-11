@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Kembali
+            </a>
+            <div>
+                <a href="{{ url_for('export_pdf', id=surat.id) }}" class="btn btn-warning">
+                    <i class="bi bi-file-pdf"></i> Export PDF
+                </a>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="bi bi-printer"></i> Print
+                </button>
+            </div>
+        </div>
+
+        <!-- Surat Izin Display -->
+        <div class="card print-container">
+            <div class="card-body">
+                <!-- Halaman 1 -->
+                <div class="page-container mb-5">
+                    <!-- Header -->
+                    <div class="text-center mb-4 border-bottom pb-3">
+                        <h4 class="mb-1">PT PLN INDONESIA POWER</h4>
+                        <h5 class="mb-1">INDONESIA POWER INTEGRATED MANAGEMENT SYSTEM</h5>
+                        <h5 class="mb-3 text-primary"><strong>SURAT IZIN KELUAR BARANG</strong></h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 text-start">
+                                <small><strong>No. Dokumen:</strong> ADP.17.01.015</small><br>
+                                <small><strong>Revisi:</strong> 2</small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small><strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}</small><br>
+                                <small><strong>Halaman:</strong> 1/2</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nomor Surat -->
+                    <div class="mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>No:</strong> {{ surat.no_surat }}</p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <p class="mb-1"><strong>Tanggal:</strong> {{ surat.tanggal }}</p>
+                            </div>
+                        </div>
+                        <p class="mb-1"><strong>Divisi:</strong> {{ surat.divisi }}</p>
+                    </div>
+
+                    <!-- Data Pemohon -->
+                    <div class="mb-4">
+                        <h6>DATA</h6>
+                        <table class="table table-bordered">
+                            <tr>
+                                <td width="20%"><strong>NAMA</strong></td>
+                                <td>{{ surat.nama }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>BADGE</strong></td>
+                                <td>{{ surat.badge }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NO KENDARAAN</strong></td>
+                                <td>{{ surat.no_kendaraan }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PERUSAHAAN</strong></td>
+                                <td>{{ surat.perusahaan }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NO SPK/MEMO</strong></td>
+                                <td>{{ surat.no_spk }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div class="mb-4">
+                        <p class="text-justify">
+                            Untuk membawa barang / keluar dari PT Indonesia Power UBP Jawa Tengah 2 Adipala 
+                            dengan rincian sebagai berikut:
+                        </p>
+                    </div>
+
+                    <!-- Daftar Barang -->
+                    <div class="mb-4">
+                        <h6>DAFTAR BARANG</h6>
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="5%">NO</th>
+                                    <th width="35%">NAMA BARANG</th>
+                                    <th width="15%">JUMLAH</th>
+                                    <th width="15%">SATUAN</th>
+                                    <th width="30%">KETERANGAN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in surat.barang_items %}
+                                <tr>
+                                    <td class="text-center">{{ loop.index }}</td>
+                                    <td>{{ item.nama_barang }}</td>
+                                    <td class="text-center">{{ item.jumlah }}</td>
+                                    <td class="text-center">{{ item.satuan }}</td>
+                                    <td>{{ item.keterangan or '-' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tanda Tangan -->
+                    <div class="row mt-5">
+                        <div class="col-md-4 text-center">
+                            <p class="border-top pt-3">
+                                <strong>PEMOHON</strong><br>
+                                {{ surat.pemohon }}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <p class="border-top pt-3">
+                                <strong>DIPERIKSA OLEH</strong><br>
+                                {{ surat.diperiksa_oleh }}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <p class="border-top pt-3">
+                                <strong>DIKETAHUI</strong><br>
+                                Komandan Regu/Assistant Manager Umum
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Disetujui -->
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <p class="border-top pt-3">
+                                    <strong>DISETUJUI OLEH</strong><br>
+                                    {{ surat.disetujui_oleh }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Halaman 2 -->
+                <div class="page-container">
+                    <!-- Header Halaman 2 -->
+                    <div class="text-center mb-4 border-bottom pb-3">
+                        <h4 class="mb-1">PT PLN INDONESIA POWER</h4>
+                        <h5 class="mb-1">INDONESIA POWER INTEGRATED MANAGEMENT SYSTEM</h5>
+                        <h5 class="mb-3 text-primary"><strong>SURAT IZIN KELUAR BARANG</strong></h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 text-start">
+                                <small><strong>No. Dokumen:</strong> ADP.17.01.015</small><br>
+                                <small><strong>Revisi:</strong> 2</small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small><strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}</small><br>
+                                <small><strong>Halaman:</strong> 2/2</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Pemohon Halaman 2 -->
+                    <div class="mb-4">
+                        <h6>DATA</h6>
+                        <table class="table table-bordered">
+                            <tr>
+                                <td width="20%"><strong>NAMA</strong></td>
+                                <td>{{ surat.nama }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>BADGE</strong></td>
+                                <td>{{ surat.badge }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NO KENDARAAN</strong></td>
+                                <td>{{ surat.no_kendaraan }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>PERUSAHAAN</strong></td>
+                                <td>{{ surat.perusahaan }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NO SPK/MEMO</strong></td>
+                                <td>{{ surat.no_spk }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Lampiran Foto -->
+                    <div class="mt-5">
+                        <h6>LAMPIRAN FOTO</h6>
+                        <div class="border p-3 min-height-200">
+                            {% if surat.lampiran_foto %}
+                                <p>{{ surat.lampiran_foto }}</p>
+                            {% else %}
+                                <p class="text-muted text-center">Lampiran foto barang</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Keterangan Halaman 2 -->
+                    <div class="mt-5">
+                        <p class="text-justify">
+                            <strong>Catatan:</strong><br>
+                            1. Surat ini harus dibawa saat pengambilan barang<br>
+                            2. Barang harus diperiksa oleh petugas keamanan<br>
+                            3. Tanda tangan dan stempel diperlukan untuk keabsahan<br>
+                            4. Lampiran foto barang wajib dilengkapi
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    @media print {
+        .navbar, .btn, .d-print-none {
+            display: none !important;
+        }
+        .print-container {
+            border: none !important;
+            padding: 0 !important;
+        }
+        .page-container {
+            page-break-after: always;
+            padding: 20px;
+        }
+        .page-container:last-child {
+            page-break-after: auto;
+        }
+        .min-height-200 {
+            min-height: 200px;
+        }
+    }
+    .min-height-200 {
+        min-height: 200px;
+        border: 1px solid #dee2e6;
+    }
+</style>
+<script>
+    // Set up print functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add print styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+                .print-container, .print-container * {
+                    visibility: visible;
+                }
+                .print-container {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                }
+                .page-container {
+                    page-break-after: always;
+                }
+                .page-container:last-child {
+                    page-break-after: auto;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}
