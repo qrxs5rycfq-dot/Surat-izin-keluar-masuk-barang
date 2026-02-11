@@ -1,12 +1,17 @@
 import os
 
+from dotenv import load_dotenv
+
+# Load .env file if it exists
+load_dotenv(os.path.join(os.path.abspath(os.path.dirname(__file__)), '.env'))
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-    # MySQL configuration
+    # MySQL configuration — override via .env or environment variables
     MYSQL_HOST = os.environ.get('MYSQL_HOST', '127.0.0.1')
     MYSQL_PORT = int(os.environ.get('MYSQL_PORT', 3306))
     MYSQL_USER = os.environ.get('MYSQL_USER', 'root')

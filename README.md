@@ -38,18 +38,18 @@ cd Surat-izin-keluar-masuk-barang
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Buat database MySQL
-mysql -u root -p < database.sql
+# 3. Konfigurasi database — salin .env.example lalu sesuaikan
+cp .env.example .env
+# Edit .env sesuai konfigurasi MySQL Anda
 
-# 4. Konfigurasi database (edit config.py atau gunakan env vars)
-export MYSQL_HOST=127.0.0.1
-export MYSQL_USER=root
-export MYSQL_PASSWORD=password123
-export MYSQL_DB=surat_izin_db
-
-# 5. Jalankan aplikasi
+# 4. Jalankan aplikasi (database & tabel dibuat otomatis)
 python app.py
 ```
+
+> **Catatan:** Aplikasi menggunakan **auto-migration** — database, tabel, dan
+> kolom baru akan dibuat/ditambahkan secara otomatis saat startup. Tidak perlu
+> menjalankan `database.sql` secara manual. File `database.sql` tetap disertakan
+> sebagai referensi schema.
 
 Aplikasi akan berjalan di `http://localhost:8000`.
 

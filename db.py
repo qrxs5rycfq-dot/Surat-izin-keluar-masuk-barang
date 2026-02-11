@@ -1,7 +1,15 @@
+import re
+
 import pymysql
 import pymysql.cursors
 from config import Config
 
+
+def _safe_identifier(name):
+    """Validate that *name* is a safe SQL identifier (letters, digits, underscore)."""
+    if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name):
+        raise ValueError(f"Unsafe SQL identifier: {name!r}")
+    return name
 
 def get_db():
     """Get a MySQL database connection returning dict rows."""
@@ -17,15 +25,16 @@ def get_db():
     return conn
 
 
-def _execute(conn, sql, params=None):
-    """Helper: execute and return cursor."""
-    cur = conn.cursor()
-    cur.execute(sql, params or ())
-    return cur
-
-
 def init_db():
-    """Create tables if needed and seed initial data."""
+    """Create database/tables, run auto-migrations, and seed initial data.
+
+    This function is safe to call on every startup.  ``CREATE TABLE IF NOT
+    EXISTS`` handles fresh installs, and ``_migrate_table`` adds any columns
+    that are missing in an existing table so the user never has to run SQL
+    migrations manually.
+    """
+
+    # --- connect without selecting a database first ---
     conn = pymysql.connect(
         host=Config.MYSQL_HOST,
         port=Config.MYSQL_PORT,
@@ -36,12 +45,15 @@ def init_db():
     )
     cur = conn.cursor()
 
+    # 1. Create database
+    db_name = _safe_identifier(Config.MYSQL_DB)
     cur.execute(
         "CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-        % Config.MYSQL_DB
+        % db_name
     )
-    cur.execute("USE `%s`" % Config.MYSQL_DB)
+    cur.execute("USE `%s`" % db_name)
 
+    # 2. Create tables (safe on fresh install)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,7 +112,33 @@ def init_db():
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     """)
 
-    # Seed default users if table is empty
+    conn.commit()
+
+    # ------------------------------------------------------------------
+    # 3. Auto-migrate: add any missing columns to existing tables
+    #    This fixes the "Unknown column 'is_active'" error when the
+    #    table was created by an older schema that lacked the column.
+    # ------------------------------------------------------------------
+    _migrate_table(cur, 'users', [
+        ('is_active',       "TINYINT(1) DEFAULT 1 AFTER `divisi`"),
+        ('role',            "ENUM('admin','staff','manager') NOT NULL DEFAULT 'staff' AFTER `nama_lengkap`"),
+        ('divisi',          "VARCHAR(50) AFTER `role`"),
+        ('updated_at',      "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`"),
+    ])
+
+    _migrate_table(cur, 'surat_izin', [
+        ('jenis',           "ENUM('keluar','masuk') NOT NULL DEFAULT 'keluar' AFTER `id`"),
+        ('status',          "ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending' AFTER `lampiran_foto`"),
+        ('catatan',         "TEXT AFTER `status`"),
+        ('created_by',      "INT AFTER `catatan`"),
+        ('updated_at',      "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`"),
+    ])
+
+    conn.commit()
+
+    # ------------------------------------------------------------------
+    # 4. Seed default users if the table is empty
+    # ------------------------------------------------------------------
     cur.execute("SELECT COUNT(*) AS c FROM users")
     if cur.fetchone()['c'] == 0:
         import bcrypt
@@ -164,3 +202,35 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
+
+
+# -----------------------------------------------------------------------
+# Helpers
+# -----------------------------------------------------------------------
+
+def _migrate_table(cur, table, columns):
+    """Add *columns* to *table* when they do not already exist.
+
+    ``columns`` is a list of ``(column_name, column_definition)`` tuples.
+    ``column_definition`` should include the full MySQL column spec
+    (type, default, AFTER clause, etc.).
+
+    The function queries ``INFORMATION_SCHEMA.COLUMNS`` to see which
+    columns are already present and only issues ``ALTER TABLE … ADD
+    COLUMN`` for the missing ones.  This makes it completely safe to run
+    on every application startup.
+    """
+    table = _safe_identifier(table)
+    cur.execute(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+        "WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s",
+        (Config.MYSQL_DB, table),
+    )
+    existing = {row['COLUMN_NAME'] for row in cur.fetchall()}
+
+    for col_name, col_def in columns:
+        col_name = _safe_identifier(col_name)
+        if col_name not in existing:
+            sql = "ALTER TABLE `%s` ADD COLUMN `%s` %s" % (table, col_name, col_def)
+            cur.execute(sql)
+            print(f"  ✅ Migrated: ALTER TABLE `{table}` ADD COLUMN `{col_name}`")
