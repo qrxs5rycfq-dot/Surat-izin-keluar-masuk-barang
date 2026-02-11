@@ -377,8 +377,8 @@ def view_surat(id):
     for key in ('approval_satpam_by', 'approval_asman_by', 'approval_manager_by'):
         uid = surat.get(key)
         if uid:
-            u = _q(conn, "SELECT nama FROM users WHERE id=%s", (uid,), one=True)
-            surat[key + '_name'] = u['nama'] if u else '-'
+            u = _q(conn, "SELECT nama_lengkap FROM users WHERE id=%s", (uid,), one=True)
+            surat[key + '_name'] = u['nama_lengkap'] if u else '-'
         else:
             surat[key + '_name'] = ''
     conn.close()
@@ -622,8 +622,8 @@ def export_pdf(id):
     for key in ('approval_satpam_by', 'approval_asman_by', 'approval_manager_by'):
         uid = surat.get(key)
         if uid:
-            u = _q(conn, "SELECT nama FROM users WHERE id=%s", (uid,), one=True)
-            surat[key + '_name'] = u['nama'] if u else '-'
+            u = _q(conn, "SELECT nama_lengkap FROM users WHERE id=%s", (uid,), one=True)
+            surat[key + '_name'] = u['nama_lengkap'] if u else '-'
         else:
             surat[key + '_name'] = ''
     conn.close()
