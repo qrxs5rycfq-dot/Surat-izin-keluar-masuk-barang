@@ -131,7 +131,7 @@
 <p class="section-title">LAMPIRAN FOTO</p>
 <div class="foto-box">
     {% if surat.lampiran_foto %}
-    <img src="{{ url_for('static', filename='uploads/' + surat.lampiran_foto) }}" alt="Lampiran Foto" style="max-width:100%; max-height:500px; height:auto; border-radius:6px;">
+    <img src="file://{{ upload_dir }}/{{ surat.lampiran_foto }}" alt="Lampiran Foto" style="max-width:100%; max-height:500px; height:auto; border-radius:6px;">
     {% else %}
     <p style="color:#999;margin-top:80px;font-size:9pt">Foto barang yang akan di{{ 'keluarkan' if surat.jenis=='keluar' else 'masukkan' }}</p>
     {% endif %}

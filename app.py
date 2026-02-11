@@ -436,10 +436,13 @@ def export_pdf(id):
     except Exception:
         surat['barang_items'] = []
 
-    html = render_template('pdf_template.html', surat=surat)
+    html = render_template('pdf_template.html', surat=surat,
+                           upload_dir=os.path.abspath(Config.UPLOAD_DIR))
     try:
         from weasyprint import HTML
-        pdf_bytes = HTML(string=html, base_url=request.host_url).write_pdf()
+        from pathlib import Path
+        base = Path(app.root_path, 'static').as_uri() + '/'
+        pdf_bytes = HTML(string=html, base_url=base).write_pdf()
         clean = ''.join(c for c in surat['no_surat'] if c.isalnum() or c in '-_.')
         filename = f"surat_izin_{clean}.pdf"
         return send_file(
