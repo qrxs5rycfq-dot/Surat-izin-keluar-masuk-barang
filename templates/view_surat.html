@@ -1,286 +1,153 @@
 {% extends "base.html" %}
+{% block title %}Detail Surat {{ surat.no_surat }} - {{ app_name }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <!-- Action Buttons -->
-        <div class="d-flex justify-content-between mb-3">
-            <a href="{{ url_for('index') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Kembali
-            </a>
-            <div>
-                <a href="{{ url_for('export_pdf', id=surat.id) }}" class="btn btn-warning">
-                    <i class="bi bi-file-pdf"></i> Export PDF
-                </a>
-                <button onclick="window.print()" class="btn btn-primary">
-                    <i class="bi bi-printer"></i> Print
-                </button>
+<!-- Header -->
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Detail Surat Izin {{ 'Keluar' if surat.jenis=='keluar' else 'Masuk' }} Barang</h2>
+        <p class="text-gray-500 text-sm mt-1">{{ surat.no_surat }}</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ url_for('surat_list') }}" class="inline-flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <a href="{{ url_for('edit_surat', id=surat.id) }}" class="inline-flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-edit"></i> Edit</a>
+        <a href="{{ url_for('export_pdf', id=surat.id) }}" class="inline-flex items-center gap-1 bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-file-pdf"></i> PDF</a>
+        <button onclick="window.print()" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition"><i class="fas fa-print"></i> Print</button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main info -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Surat header card -->
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div class="px-6 py-4 border-b {{ 'bg-red-50' if surat.jenis=='keluar' else 'bg-green-50' }} flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-lg p-2 {{ 'bg-red-100 text-red-600' if surat.jenis=='keluar' else 'bg-green-100 text-green-600' }}">
+                        <i class="fas fa-{{ 'arrow-up' if surat.jenis=='keluar' else 'arrow-down' }} text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-800">SURAT IZIN {{ 'KELUAR' if surat.jenis=='keluar' else 'MASUK' }} BARANG</p>
+                        <p class="text-xs text-gray-500">{{ company_name }} &mdash; {{ company_sub }}</p>
+                    </div>
+                </div>
+                {% if surat.status == 'approved' %}
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700"><i class="fas fa-check-circle"></i> Disetujui</span>
+                {% elif surat.status == 'rejected' %}
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700"><i class="fas fa-times-circle"></i> Ditolak</span>
+                {% else %}
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700"><i class="fas fa-clock"></i> Pending</span>
+                {% endif %}
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-6">
+                    <div><p class="text-gray-500 text-xs uppercase">No. Surat</p><p class="font-semibold">{{ surat.no_surat }}</p></div>
+                    <div><p class="text-gray-500 text-xs uppercase">Tanggal</p><p class="font-semibold">{{ surat.tanggal }}</p></div>
+                    <div><p class="text-gray-500 text-xs uppercase">Tgl. Terbit</p><p class="font-semibold">{{ surat.tgl_terbit }}</p></div>
+                    <div><p class="text-gray-500 text-xs uppercase">Divisi</p><p class="font-semibold">{{ surat.divisi }}</p></div>
+                    <div><p class="text-gray-500 text-xs uppercase">No. Dokumen</p><p class="font-semibold">ADP.17.01.015</p></div>
+                    <div><p class="text-gray-500 text-xs uppercase">Revisi</p><p class="font-semibold">2</p></div>
+                </div>
+
+                <!-- Data pemohon -->
+                <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-user text-blue-500"></i> Data Pemohon</h4>
+                <div class="bg-gray-50 rounded-lg overflow-hidden mb-6">
+                    <table class="w-full text-sm">
+                        <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600 w-40">Nama</td><td class="px-4 py-2.5">{{ surat.nama }}</td></tr>
+                        <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">Badge</td><td class="px-4 py-2.5">{{ surat.badge }}</td></tr>
+                        <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">No. Kendaraan</td><td class="px-4 py-2.5">{{ surat.no_kendaraan }}</td></tr>
+                        <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">Perusahaan</td><td class="px-4 py-2.5">{{ surat.perusahaan }}</td></tr>
+                        <tr><td class="px-4 py-2.5 font-medium text-gray-600">No. SPK/MEMO</td><td class="px-4 py-2.5">{{ surat.no_spk }}</td></tr>
+                    </table>
+                </div>
+
+                <!-- Daftar barang -->
+                <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-boxes text-blue-500"></i> Daftar Barang</h4>
+                <div class="overflow-x-auto rounded-lg border">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+                            <tr><th class="px-4 py-2.5 text-center w-10">No</th><th class="px-4 py-2.5 text-left">Nama Barang</th><th class="px-4 py-2.5 text-center">Jumlah</th><th class="px-4 py-2.5 text-center">Satuan</th><th class="px-4 py-2.5 text-left">Keterangan</th></tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            {% for item in surat.barang_items %}
+                            <tr><td class="px-4 py-2.5 text-center">{{ loop.index }}</td><td class="px-4 py-2.5">{{ item.nama_barang }}</td><td class="px-4 py-2.5 text-center">{{ item.jumlah }}</td><td class="px-4 py-2.5 text-center">{{ item.satuan }}</td><td class="px-4 py-2.5 text-gray-500">{{ item.keterangan or '-' }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Surat Izin Display -->
-        <div class="card print-container">
-            <div class="card-body">
-                <!-- Halaman 1 -->
-                <div class="page-container mb-5">
-                    <!-- Header -->
-                    <div class="text-center mb-4 border-bottom pb-3">
-                        <h4 class="mb-1">PT PLN INDONESIA POWER</h4>
-                        <h5 class="mb-1">INDONESIA POWER INTEGRATED MANAGEMENT SYSTEM</h5>
-                        <h5 class="mb-3 text-primary"><strong>SURAT IZIN KELUAR BARANG</strong></h5>
-                        
-                        <div class="row">
-                            <div class="col-md-6 text-start">
-                                <small><strong>No. Dokumen:</strong> ADP.17.01.015</small><br>
-                                <small><strong>Revisi:</strong> 2</small>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <small><strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}</small><br>
-                                <small><strong>Halaman:</strong> 1/2</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Nomor Surat -->
-                    <div class="mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-1"><strong>No:</strong> {{ surat.no_surat }}</p>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <p class="mb-1"><strong>Tanggal:</strong> {{ surat.tanggal }}</p>
-                            </div>
-                        </div>
-                        <p class="mb-1"><strong>Divisi:</strong> {{ surat.divisi }}</p>
-                    </div>
-
-                    <!-- Data Pemohon -->
-                    <div class="mb-4">
-                        <h6>DATA</h6>
-                        <table class="table table-bordered">
-                            <tr>
-                                <td width="20%"><strong>NAMA</strong></td>
-                                <td>{{ surat.nama }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>BADGE</strong></td>
-                                <td>{{ surat.badge }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>NO KENDARAAN</strong></td>
-                                <td>{{ surat.no_kendaraan }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>PERUSAHAAN</strong></td>
-                                <td>{{ surat.perusahaan }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>NO SPK/MEMO</strong></td>
-                                <td>{{ surat.no_spk }}</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <!-- Deskripsi -->
-                    <div class="mb-4">
-                        <p class="text-justify">
-                            Untuk membawa barang / keluar dari PT Indonesia Power UBP Jawa Tengah 2 Adipala 
-                            dengan rincian sebagai berikut:
-                        </p>
-                    </div>
-
-                    <!-- Daftar Barang -->
-                    <div class="mb-4">
-                        <h6>DAFTAR BARANG</h6>
-                        <table class="table table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="5%">NO</th>
-                                    <th width="35%">NAMA BARANG</th>
-                                    <th width="15%">JUMLAH</th>
-                                    <th width="15%">SATUAN</th>
-                                    <th width="30%">KETERANGAN</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in surat.barang_items %}
-                                <tr>
-                                    <td class="text-center">{{ loop.index }}</td>
-                                    <td>{{ item.nama_barang }}</td>
-                                    <td class="text-center">{{ item.jumlah }}</td>
-                                    <td class="text-center">{{ item.satuan }}</td>
-                                    <td>{{ item.keterangan or '-' }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Tanda Tangan -->
-                    <div class="row mt-5">
-                        <div class="col-md-4 text-center">
-                            <p class="border-top pt-3">
-                                <strong>PEMOHON</strong><br>
-                                {{ surat.pemohon }}
-                            </p>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <p class="border-top pt-3">
-                                <strong>DIPERIKSA OLEH</strong><br>
-                                {{ surat.diperiksa_oleh }}
-                            </p>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <p class="border-top pt-3">
-                                <strong>DIKETAHUI</strong><br>
-                                Komandan Regu/Assistant Manager Umum
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Disetujui -->
-                    <div class="row mt-4">
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <p class="border-top pt-3">
-                                    <strong>DISETUJUI OLEH</strong><br>
-                                    {{ surat.disetujui_oleh }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Tanda tangan -->
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h4 class="font-semibold text-gray-700 mb-6 flex items-center gap-2"><i class="fas fa-signature text-blue-500"></i> Tanda Tangan</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center text-sm">
+                <div class="border rounded-lg p-4">
+                    <p class="text-xs text-gray-400 uppercase mb-8">Pemohon</p>
+                    <div class="border-t pt-3"><p class="font-semibold">{{ surat.pemohon }}</p></div>
                 </div>
-
-                <!-- Halaman 2 -->
-                <div class="page-container">
-                    <!-- Header Halaman 2 -->
-                    <div class="text-center mb-4 border-bottom pb-3">
-                        <h4 class="mb-1">PT PLN INDONESIA POWER</h4>
-                        <h5 class="mb-1">INDONESIA POWER INTEGRATED MANAGEMENT SYSTEM</h5>
-                        <h5 class="mb-3 text-primary"><strong>SURAT IZIN KELUAR BARANG</strong></h5>
-                        
-                        <div class="row">
-                            <div class="col-md-6 text-start">
-                                <small><strong>No. Dokumen:</strong> ADP.17.01.015</small><br>
-                                <small><strong>Revisi:</strong> 2</small>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <small><strong>Tgl. Terbit:</strong> {{ surat.tgl_terbit }}</small><br>
-                                <small><strong>Halaman:</strong> 2/2</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Data Pemohon Halaman 2 -->
-                    <div class="mb-4">
-                        <h6>DATA</h6>
-                        <table class="table table-bordered">
-                            <tr>
-                                <td width="20%"><strong>NAMA</strong></td>
-                                <td>{{ surat.nama }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>BADGE</strong></td>
-                                <td>{{ surat.badge }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>NO KENDARAAN</strong></td>
-                                <td>{{ surat.no_kendaraan }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>PERUSAHAAN</strong></td>
-                                <td>{{ surat.perusahaan }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>NO SPK/MEMO</strong></td>
-                                <td>{{ surat.no_spk }}</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <!-- Lampiran Foto -->
-                    <div class="mt-5">
-                        <h6>LAMPIRAN FOTO</h6>
-                        <div class="border p-3 min-height-200">
-                            {% if surat.lampiran_foto %}
-                                <p>{{ surat.lampiran_foto }}</p>
-                            {% else %}
-                                <p class="text-muted text-center">Lampiran foto barang</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Keterangan Halaman 2 -->
-                    <div class="mt-5">
-                        <p class="text-justify">
-                            <strong>Catatan:</strong><br>
-                            1. Surat ini harus dibawa saat pengambilan barang<br>
-                            2. Barang harus diperiksa oleh petugas keamanan<br>
-                            3. Tanda tangan dan stempel diperlukan untuk keabsahan<br>
-                            4. Lampiran foto barang wajib dilengkapi
-                        </p>
-                    </div>
+                <div class="border rounded-lg p-4">
+                    <p class="text-xs text-gray-400 uppercase mb-8">Diperiksa Oleh</p>
+                    <div class="border-t pt-3"><p class="font-semibold">{{ surat.diperiksa_oleh }}</p></div>
+                </div>
+                <div class="border rounded-lg p-4">
+                    <p class="text-xs text-gray-400 uppercase mb-8">Disetujui Oleh</p>
+                    <div class="border-t pt-3"><p class="font-semibold">{{ surat.disetujui_oleh }}</p></div>
                 </div>
             </div>
+        </div>
+
+        <!-- Lampiran foto -->
+        {% if surat.lampiran_foto %}
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h4>
+            <img src="{{ url_for('static', filename='uploads/' + surat.lampiran_foto) }}" class="rounded-lg shadow max-w-full" alt="Lampiran">
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Status card -->
+        {% if current_user.role in ('admin','manager') %}
+        <div class="bg-white rounded-xl shadow-sm border p-5">
+            <h4 class="font-semibold text-gray-700 mb-4">Ubah Status</h4>
+            <form method="POST" action="{{ url_for('update_status', id=surat.id) }}" class="space-y-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="pending" {{ 'selected' if surat.status=='pending' }}>Pending</option>
+                    <option value="approved" {{ 'selected' if surat.status=='approved' }}>Disetujui</option>
+                    <option value="rejected" {{ 'selected' if surat.status=='rejected' }}>Ditolak</option>
+                </select>
+                <textarea name="catatan" rows="3" placeholder="Catatan (opsional)..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">{{ surat.catatan or '' }}</textarea>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition">Simpan Status</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Info card -->
+        <div class="bg-white rounded-xl shadow-sm border p-5">
+            <h4 class="font-semibold text-gray-700 mb-3">Informasi</h4>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Dibuat</span><span>{{ surat.created_at }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Diperbarui</span><span>{{ surat.updated_at }}</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Total Barang</span><span class="font-semibold">{{ surat.barang_items|length }} item</span></div>
+                {% if surat.catatan %}
+                <div class="pt-2 border-t"><p class="text-gray-500 text-xs mb-1">Catatan:</p><p class="text-gray-700">{{ surat.catatan }}</p></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Catatan penting -->
+        <div class="bg-blue-50 rounded-xl border border-blue-200 p-5">
+            <h4 class="font-semibold text-blue-800 mb-2 text-sm"><i class="fas fa-info-circle mr-1"></i> Catatan Penting</h4>
+            <ul class="text-xs text-blue-700 space-y-1.5 list-disc list-inside">
+                <li>Surat ini harus dibawa saat pengambilan/pengiriman barang</li>
+                <li>Barang harus diperiksa oleh petugas keamanan</li>
+                <li>Tanda tangan dan stempel diperlukan untuk keabsahan</li>
+                <li>Surat berlaku pada tanggal yang tercantum</li>
+            </ul>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<style>
-    @media print {
-        .navbar, .btn, .d-print-none {
-            display: none !important;
-        }
-        .print-container {
-            border: none !important;
-            padding: 0 !important;
-        }
-        .page-container {
-            page-break-after: always;
-            padding: 20px;
-        }
-        .page-container:last-child {
-            page-break-after: auto;
-        }
-        .min-height-200 {
-            min-height: 200px;
-        }
-    }
-    .min-height-200 {
-        min-height: 200px;
-        border: 1px solid #dee2e6;
-    }
-</style>
-<script>
-    // Set up print functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add print styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @media print {
-                body * {
-                    visibility: hidden;
-                }
-                .print-container, .print-container * {
-                    visibility: visible;
-                }
-                .print-container {
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    width: 100%;
-                }
-                .page-container {
-                    page-break-after: always;
-                }
-                .page-container:last-child {
-                    page-break-after: auto;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    });
-</script>
 {% endblock %}
