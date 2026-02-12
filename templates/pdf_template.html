@@ -238,18 +238,19 @@
 
 <p class="section-title">LAMPIRAN FOTO BARANG</p>
 <div class="foto-box">
-    {% set has_item_foto = surat.barang_items | selectattr('foto') | list | length > 0 %}
-    {% if has_item_foto %}
+    {% set foto_items = [] %}
+    {% for item in surat.barang_items %}{% if item.foto %}{% for f in item.foto %}{% if foto_items.append({'f':f,'nama':item.nama_barang}) %}{% endif %}{% endfor %}{% endif %}{% endfor %}
+    {% set fc = foto_items | length %}
+    {% if fc > 0 %}
+    {% set cw = '280px' if fc <= 1 else ('220px' if fc <= 2 else ('160px' if fc <= 4 else '120px')) %}
+    {% set iw = '260px' if fc <= 1 else ('200px' if fc <= 2 else ('145px' if fc <= 4 else '110px')) %}
+    {% set ih = '200px' if fc <= 1 else ('150px' if fc <= 2 else ('110px' if fc <= 4 else '90px')) %}
     <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
-        {% for item in surat.barang_items %}
-        {% if item.foto %}
-        {% for f in item.foto %}
-        <div style="display:inline-block;text-align:center;width:120px;">
-            <img src="file://{{ upload_dir }}/{{ f }}" style="width:110px;height:90px;object-fit:cover;border-radius:6px;border:1.5px solid #d1d5db;" alt="{{ item.nama_barang }}">
-            <p style="font-size:7.5pt;font-weight:bold;color:#1e40af;margin:4px 0 0;line-height:1.2;word-wrap:break-word;">{{ item.nama_barang }}</p>
+        {% for p in foto_items %}
+        <div style="display:inline-block;text-align:center;width:{{ cw }};">
+            <img src="file://{{ upload_dir }}/{{ p.f }}" style="width:{{ iw }};height:{{ ih }};object-fit:cover;border-radius:6px;border:1.5px solid #d1d5db;" alt="{{ p.nama }}">
+            <p style="font-size:{{ '9pt' if fc <= 2 else '7.5pt' }};font-weight:bold;color:#1e40af;margin:4px 0 0;line-height:1.2;word-wrap:break-word;">{{ p.nama }}</p>
         </div>
-        {% endfor %}
-        {% endif %}
         {% endfor %}
     </div>
     {% else %}
