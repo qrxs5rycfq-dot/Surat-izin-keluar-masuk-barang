@@ -75,6 +75,7 @@
                                 <th class="px-4 py-2.5 text-center">Satuan</th>
                                 <th class="px-4 py-2.5 text-left">Keterangan</th>
                                 <th class="px-4 py-2.5 text-center">Foto</th>
+                                <th class="px-4 py-2.5 text-center">Cek User</th>
                                 <th class="px-4 py-2.5 text-center">Cek Satpam</th>
                             </tr>
                         </thead>
@@ -100,6 +101,15 @@
                                     {% endif %}
                                 </td>
                                 <td class="px-4 py-2.5 text-center">
+                                    {% if item.approval_user == 'sesuai' %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-check"></i> Sesuai</span>
+                                    {% elif item.approval_user == 'tidak_sesuai' %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700"><i class="fas fa-times"></i> Tidak</span>
+                                    {% else %}
+                                    <span class="text-gray-400 text-xs">Belum</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2.5 text-center">
                                     {% if item.approval_satpam == 'sesuai' %}
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-check"></i> Sesuai</span>
                                     {% elif item.approval_satpam == 'tidak_sesuai' %}
@@ -119,20 +129,32 @@
         <!-- Tanda tangan -->
         <div class="bg-white rounded-xl shadow-sm border p-6">
             <h4 class="font-semibold text-gray-700 mb-6 flex items-center gap-2"><i class="fas fa-signature text-blue-500"></i> Tanda Tangan</h4>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center text-sm">
-                <!-- Pemohon / User -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 text-center text-sm">
+                <!-- Pemohon (Creator) -->
                 <div class="border rounded-lg p-4">
                     <p class="text-xs text-gray-400 uppercase mb-1">Pemohon</p>
-                    {% if surat.approval_user == 'confirmed' %}
-                    <div class="inline-block px-3 py-1 rounded border-2 border-green-500 bg-green-50 text-green-700 text-xs font-bold transform -rotate-2 my-1">✓ DIKONFIRMASI</div>
+                    <div class="my-1">&nbsp;</div>
+                    <div class="mb-2">&nbsp;</div>
+                    <div class="border-t-2 border-blue-500 pt-2">
+                        <p class="font-semibold text-gray-800">{{ surat.creator_name or surat.nama or '________________' }}</p>
+                        <p class="text-xs text-gray-400">Pemohon</p>
+                    </div>
+                </div>
+                <!-- User / Pemberi Kerja -->
+                <div class="border rounded-lg p-4">
+                    <p class="text-xs text-gray-400 uppercase mb-1">Pemberi Kerja</p>
+                    {% if surat.approval_user == 'sesuai' %}
+                    <div class="inline-block px-3 py-1 rounded border-2 border-green-500 bg-green-50 text-green-700 text-xs font-bold transform -rotate-2 my-1">✓ SESUAI</div>
+                    {% elif surat.approval_user == 'tidak_sesuai' %}
+                    <div class="inline-block px-3 py-1 rounded border-2 border-red-500 bg-red-50 text-red-700 text-xs font-bold transform -rotate-2 my-1">✗ TIDAK SESUAI</div>
                     {% else %}
                     <p class="text-xs text-gray-400 my-1">⏳ Menunggu</p>
                     {% endif %}
                     {% if surat.approval_user_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_user_at }}</p>{% endif %}
                     <div class="mb-2">&nbsp;</div>
                     <div class="border-t-2 border-blue-500 pt-2">
-                        <p class="font-semibold text-gray-800">{{ surat.approval_user_by_name or '________________' }}</p>
-                        <p class="text-xs text-gray-400">Pemohon</p>
+                        <p class="font-semibold text-gray-800">________________</p>
+                        <p class="text-xs text-gray-400">User / Pemberi Kerja</p>
                     </div>
                 </div>
                 <!-- Satpam -->
@@ -148,7 +170,7 @@
                     {% if surat.approval_satpam_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_satpam_at }}</p>{% endif %}
                     <div class="mb-2">&nbsp;</div>
                     <div class="border-t-2 border-blue-500 pt-2">
-                        <p class="font-semibold text-gray-800">{{ surat.approval_satpam_by_name or '________________' }}</p>
+                        <p class="font-semibold text-gray-800">________________</p>
                         <p class="text-xs text-gray-400">Satpam</p>
                     </div>
                 </div>
@@ -165,7 +187,7 @@
                     {% if surat.approval_asman_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_asman_at }}</p>{% endif %}
                     <div class="mb-2">&nbsp;</div>
                     <div class="border-t-2 border-blue-500 pt-2">
-                        <p class="font-semibold text-gray-800">{{ surat.approval_asman_by_name or '________________' }}</p>
+                        <p class="font-semibold text-gray-800">________________</p>
                         <p class="text-xs text-gray-400">Asman Umum</p>
                     </div>
                 </div>
@@ -182,7 +204,7 @@
                     {% if surat.approval_manager_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_manager_at }}</p>{% endif %}
                     <div class="mb-2">&nbsp;</div>
                     <div class="border-t-2 border-blue-500 pt-2">
-                        <p class="font-semibold text-gray-800">{{ surat.approval_manager_by_name or '________________' }}</p>
+                        <p class="font-semibold text-gray-800">________________</p>
                         <p class="text-xs text-gray-400">Manager Administrasi</p>
                     </div>
                 </div>
@@ -193,24 +215,37 @@
         <div class="bg-white rounded-xl shadow-sm border p-6">
             <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-tasks text-blue-500"></i> Alur Persetujuan</h4>
             <div class="space-y-4">
-                <!-- Step 0: User / Pemohon -->
+                <!-- Step 0: Pemohon (Creator) -->
                 <div class="flex items-start gap-3">
-                    <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                        {% if surat.approval_user == 'confirmed' %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-400{% endif %}">
-                        {% if surat.approval_user == 'confirmed' %}<i class="fas fa-check"></i>{% else %}1{% endif %}
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-blue-100 text-blue-700">
+                        <i class="fas fa-user"></i>
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-semibold text-gray-800">Pemohon / User</p>
-                        {% if surat.approval_user == 'confirmed' %}
-                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Dikonfirmasi — {{ surat.approval_user_at }}{% if surat.approval_user_by_name %} oleh <strong>{{ surat.approval_user_by_name }}</strong>{% endif %}</p>
+                        <p class="text-sm font-semibold text-gray-800">Pemohon</p>
+                        <p class="text-xs text-blue-600"><i class="fas fa-file-alt mr-1"></i>Surat dibuat oleh <strong>{{ surat.creator_name or surat.nama }}</strong></p>
+                    </div>
+                </div>
+                <div class="ml-4 border-l-2 border-blue-300 h-4"></div>
+                <!-- Step 1: User / Pemberi Kerja -->
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                        {% if surat.approval_user in ('sesuai', 'tidak_sesuai') %}{% if surat.approval_user == 'sesuai' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}{% else %}bg-gray-100 text-gray-400{% endif %}">
+                        {% if surat.approval_user == 'sesuai' %}<i class="fas fa-check"></i>{% elif surat.approval_user == 'tidak_sesuai' %}<i class="fas fa-times"></i>{% else %}1{% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-gray-800">User / Pemberi Kerja</p>
+                        {% if surat.approval_user == 'sesuai' %}
+                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Sesuai — {{ surat.approval_user_at }}</p>
+                        {% elif surat.approval_user == 'tidak_sesuai' %}
+                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Tidak Sesuai — {{ surat.approval_user_at }}</p>
                         {% else %}
-                        <p class="text-xs text-gray-400">Menunggu konfirmasi pemohon</p>
+                        <p class="text-xs text-gray-400">Menunggu pengecekan pemberi kerja</p>
                         {% endif %}
                         {% if surat.approval_user_note %}<p class="text-xs text-gray-500 mt-0.5 italic">"{{ surat.approval_user_note }}"</p>{% endif %}
                     </div>
                 </div>
-                <div class="ml-4 border-l-2 {{ 'border-green-300' if surat.approval_user == 'confirmed' else 'border-gray-200' }} h-4"></div>
-                <!-- Step 1: Satpam -->
+                <div class="ml-4 border-l-2 {{ 'border-green-300' if surat.approval_user == 'sesuai' else 'border-gray-200' }} h-4"></div>
+                <!-- Step 2: Satpam -->
                 <div class="flex items-start gap-3">
                     <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                         {% if surat.approval_satpam == 'sesuai' %}bg-green-100 text-green-700{% elif surat.approval_satpam == 'tidak_sesuai' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-400{% endif %}">
@@ -219,9 +254,9 @@
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-800">Satpam / Security</p>
                         {% if surat.approval_satpam == 'sesuai' %}
-                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Sesuai — {{ surat.approval_satpam_at }}{% if surat.approval_satpam_by_name %} oleh <strong>{{ surat.approval_satpam_by_name }}</strong>{% endif %}</p>
+                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Sesuai — {{ surat.approval_satpam_at }}</p>
                         {% elif surat.approval_satpam == 'tidak_sesuai' %}
-                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Tidak Sesuai — {{ surat.approval_satpam_at }}{% if surat.approval_satpam_by_name %} oleh <strong>{{ surat.approval_satpam_by_name }}</strong>{% endif %}</p>
+                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Tidak Sesuai — {{ surat.approval_satpam_at }}</p>
                         {% else %}
                         <p class="text-xs text-gray-400">Menunggu pemeriksaan</p>
                         {% endif %}
@@ -229,7 +264,7 @@
                     </div>
                 </div>
                 <div class="ml-4 border-l-2 {{ 'border-green-300' if surat.approval_satpam == 'sesuai' else 'border-gray-200' }} h-4"></div>
-                <!-- Step 2: Asman Umum -->
+                <!-- Step 3: Asman Umum -->
                 <div class="flex items-start gap-3">
                     <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                         {% if surat.approval_asman == 'approved' %}bg-green-100 text-green-700{% elif surat.approval_asman == 'rejected' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-400{% endif %}">
@@ -238,9 +273,9 @@
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-800">Asman Umum</p>
                         {% if surat.approval_asman == 'approved' %}
-                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_asman_at }}{% if surat.approval_asman_by_name %} oleh <strong>{{ surat.approval_asman_by_name }}</strong>{% endif %}</p>
+                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_asman_at }}</p>
                         {% elif surat.approval_asman == 'rejected' %}
-                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_asman_at }}{% if surat.approval_asman_by_name %} oleh <strong>{{ surat.approval_asman_by_name }}</strong>{% endif %}</p>
+                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_asman_at }}</p>
                         {% else %}
                         <p class="text-xs text-gray-400">Menunggu review</p>
                         {% endif %}
@@ -248,7 +283,7 @@
                     </div>
                 </div>
                 <div class="ml-4 border-l-2 {{ 'border-green-300' if surat.approval_asman == 'approved' else 'border-gray-200' }} h-4"></div>
-                <!-- Step 3: Manager Administrasi -->
+                <!-- Step 4: Manager Administrasi -->
                 <div class="flex items-start gap-3">
                     <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                         {% if surat.approval_manager == 'approved' %}bg-green-100 text-green-700{% elif surat.approval_manager == 'rejected' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-400{% endif %}">
@@ -257,9 +292,9 @@
                     <div class="flex-1">
                         <p class="text-sm font-semibold text-gray-800">Manager Administrasi</p>
                         {% if surat.approval_manager == 'approved' %}
-                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_manager_at }}{% if surat.approval_manager_by_name %} oleh <strong>{{ surat.approval_manager_by_name }}</strong>{% endif %}</p>
+                        <p class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Disetujui — {{ surat.approval_manager_at }}</p>
                         {% elif surat.approval_manager == 'rejected' %}
-                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_manager_at }}{% if surat.approval_manager_by_name %} oleh <strong>{{ surat.approval_manager_by_name }}</strong>{% endif %}</p>
+                        <p class="text-xs text-red-600"><i class="fas fa-times-circle mr-1"></i>Ditolak — {{ surat.approval_manager_at }}</p>
                         {% else %}
                         <p class="text-xs text-gray-400">Menunggu approval final</p>
                         {% endif %}
@@ -284,23 +319,36 @@
 
     <!-- Sidebar -->
     <div class="space-y-6">
-        <!-- User Confirmation -->
-        {% if (current_user.id == surat.created_by or current_user.role == 'admin') and surat.approval_user != 'confirmed' %}
+        <!-- User / Pemberi Kerja Check -->
+        {% if current_user.role in ('staff', 'admin') and surat.approval_user == 'pending' %}
         <div class="bg-white rounded-xl shadow-sm border p-5">
-            <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-user-check text-blue-500"></i> Konfirmasi Pemohon</h4>
-            <p class="text-xs text-gray-500 mb-3">Konfirmasi bahwa data surat dan daftar barang sudah benar.</p>
+            <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-user-check text-blue-500"></i> Pengecekan Pemberi Kerja</h4>
+            <p class="text-xs text-gray-500 mb-3">Periksa kesesuaian tiap barang sebagai pemberi kerja.</p>
             <form method="POST" action="{{ url_for('approve_surat', id=surat.id) }}" class="space-y-3">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="stage" value="user">
-                <input type="hidden" name="decision" value="confirmed">
-                <textarea name="note" rows="2" placeholder="Catatan (opsional)..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></textarea>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 rounded-lg transition">✓ Konfirmasi Surat</button>
+                <p class="text-xs text-gray-500 mb-2">Periksa kesesuaian tiap barang:</p>
+                {% for item in surat.barang_items %}
+                <div class="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-2">
+                    <span class="truncate mr-2">{{ item.nama_barang }}</span>
+                    <select name="item_user_approval_{{ loop.index0 }}" class="text-xs border border-gray-300 rounded px-2 py-1">
+                        <option value="sesuai">Sesuai</option>
+                        <option value="tidak_sesuai">Tidak Sesuai</option>
+                    </select>
+                </div>
+                {% endfor %}
+                <select name="decision" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="sesuai">✅ Semua Sesuai</option>
+                    <option value="tidak_sesuai">❌ Tidak Sesuai</option>
+                </select>
+                <textarea name="note" rows="2" placeholder="Catatan pemberi kerja..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></textarea>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 rounded-lg transition">✓ Simpan Pengecekan</button>
             </form>
         </div>
         {% endif %}
 
-        <!-- Approval Action -->
-        {% if current_user.role in ('satpam', 'admin') and surat.approval_user == 'confirmed' and surat.approval_satpam == 'pending' %}
+        <!-- Approval Action: Satpam -->
+        {% if current_user.role in ('satpam', 'admin') and surat.approval_user in ('sesuai', 'tidak_sesuai') and surat.approval_satpam == 'pending' %}
         <div class="bg-white rounded-xl shadow-sm border p-5">
             <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-shield-alt text-blue-500"></i> Pemeriksaan Satpam</h4>
             <form method="POST" action="{{ url_for('approve_surat', id=surat.id) }}" class="space-y-3">
@@ -326,7 +374,7 @@
         </div>
         {% endif %}
 
-        {% if current_user.role in ('asman', 'admin') and surat.approval_user == 'confirmed' and surat.approval_satpam != 'pending' and surat.approval_asman == 'pending' %}
+        {% if current_user.role in ('asman', 'admin') and surat.approval_user in ('sesuai', 'tidak_sesuai') and surat.approval_satpam != 'pending' and surat.approval_asman == 'pending' %}
         <div class="bg-white rounded-xl shadow-sm border p-5">
             <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-user-tie text-blue-500"></i> Review Asman Umum</h4>
             <form method="POST" action="{{ url_for('approve_surat', id=surat.id) }}" class="space-y-3">
@@ -342,7 +390,7 @@
         </div>
         {% endif %}
 
-        {% if current_user.role in ('manager', 'admin') and surat.approval_user == 'confirmed' and surat.approval_asman != 'pending' and surat.approval_manager == 'pending' %}
+        {% if current_user.role in ('manager', 'admin') and surat.approval_user in ('sesuai', 'tidak_sesuai') and surat.approval_asman != 'pending' and surat.approval_manager == 'pending' %}
         <div class="bg-white rounded-xl shadow-sm border p-5">
             <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"><i class="fas fa-user-shield text-blue-500"></i> Approval Manager</h4>
             <form method="POST" action="{{ url_for('approve_surat', id=surat.id) }}" class="space-y-3">

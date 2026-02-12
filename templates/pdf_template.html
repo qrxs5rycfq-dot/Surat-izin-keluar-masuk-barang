@@ -86,7 +86,7 @@
 
 <p class="section-title">DAFTAR BARANG</p>
 <table class="barang-table">
-    <thead><tr><th style="width:5%">NO</th><th style="width:25%">NAMA BARANG</th><th style="width:8%">JML</th><th style="width:8%">SATUAN</th><th style="width:18%">KETERANGAN</th><th style="width:18%">FOTO</th><th style="width:18%">CEK SATPAM</th></tr></thead>
+    <thead><tr><th style="width:5%">NO</th><th style="width:20%">NAMA BARANG</th><th style="width:7%">JML</th><th style="width:7%">SATUAN</th><th style="width:15%">KETERANGAN</th><th style="width:14%">FOTO</th><th style="width:16%">CEK USER</th><th style="width:16%">CEK SATPAM</th></tr></thead>
     <tbody>
         {% for item in surat.barang_items %}
         <tr>
@@ -103,6 +103,13 @@
                 {% else %}-{% endif %}
             </td>
             <td style="text-align:center">
+                {% if item.approval_user == 'sesuai' %}
+                <span style="color:#16a34a;font-weight:bold">✓ Sesuai</span>
+                {% elif item.approval_user == 'tidak_sesuai' %}
+                <span style="color:#dc2626;font-weight:bold">✗ Tidak</span>
+                {% else %}-{% endif %}
+            </td>
+            <td style="text-align:center">
                 {% if item.approval_satpam == 'sesuai' %}
                 <span style="color:#16a34a;font-weight:bold">✓ Sesuai</span>
                 {% elif item.approval_satpam == 'tidak_sesuai' %}
@@ -116,12 +123,22 @@
 
 <div class="signature-container">
     <div class="sig-row">
-        <!-- Pemohon / User -->
+        <!-- Pemohon (Creator) -->
         <div class="sig-box">
             <div class="sig-title">Pemohon</div>
+            <div class="sig-status">&nbsp;</div>
+            <div class="sig-line"></div>
+            <div class="sig-name">{{ surat.creator_name or surat.nama or '________________' }}</div>
+            <div class="sig-role">Pemohon</div>
+        </div>
+        <!-- User / Pemberi Kerja -->
+        <div class="sig-box">
+            <div class="sig-title">Pemberi Kerja</div>
             <div class="sig-status">
-                {% if surat.approval_user == 'confirmed' %}
-                <span class="stamp stamp-green">✓ DIKONFIRMASI</span>
+                {% if surat.approval_user == 'sesuai' %}
+                <span class="stamp stamp-green">✓ SESUAI</span>
+                {% elif surat.approval_user == 'tidak_sesuai' %}
+                <span class="stamp stamp-red">✗ TIDAK SESUAI</span>
                 {% else %}
                 <span class="stamp stamp-pending">⏳ Menunggu</span>
                 {% endif %}
@@ -130,8 +147,8 @@
             <div class="sig-date">{{ surat.approval_user_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">{{ surat.approval_user_by_name or '________________' }}</div>
-            <div class="sig-role">Pemohon</div>
+            <div class="sig-name">________________</div>
+            <div class="sig-role">User / Pemberi Kerja</div>
         </div>
         <!-- Satpam -->
         <div class="sig-box">
@@ -149,7 +166,7 @@
             <div class="sig-date">{{ surat.approval_satpam_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">{{ surat.approval_satpam_by_name or '________________' }}</div>
+            <div class="sig-name">________________</div>
             <div class="sig-role">Satpam</div>
         </div>
         <!-- Asman Umum -->
@@ -168,7 +185,7 @@
             <div class="sig-date">{{ surat.approval_asman_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">{{ surat.approval_asman_by_name or '________________' }}</div>
+            <div class="sig-name">________________</div>
             <div class="sig-role">Asman Umum</div>
         </div>
         <!-- Manager Administrasi -->
@@ -187,7 +204,7 @@
             <div class="sig-date">{{ surat.approval_manager_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">{{ surat.approval_manager_by_name or '________________' }}</div>
+            <div class="sig-name">________________</div>
             <div class="sig-role">Manager Administrasi</div>
         </div>
     </div>

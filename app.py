@@ -520,28 +520,37 @@ def approve_surat(id):
         return redirect(url_for('surat_list'))
 
     if stage == 'user':
-        # Only the creator or admin can confirm
-        if current_user.id != surat.get('created_by') and current_user.role != 'admin':
+        # User / Pemberi Kerja (staff or admin) — NOT the pemohon/creator
+        if current_user.role not in ('staff', 'admin'):
             abort(403)
-        if decision != 'confirmed':
+        if decision not in ('sesuai', 'tidak_sesuai'):
             flash('Keputusan tidak valid.', 'danger')
             return redirect(url_for('view_surat', id=id))
+        # Save per-item user approvals from form
+        try:
+            barang_items = json.loads(surat['barang_items']) if surat['barang_items'] else []
+        except (json.JSONDecodeError, TypeError):
+            barang_items = []
+        for i, item in enumerate(barang_items):
+            item_approval = request.form.get(f'item_user_approval_{i}', 'pending')
+            item['approval_user'] = item_approval
         _exec(conn, """UPDATE surat_izin SET
-            approval_user='confirmed', approval_user_by=%s, approval_user_at=NOW(),
-            approval_user_note=%s
+            approval_user=%s, approval_user_by=%s, approval_user_at=NOW(),
+            approval_user_note=%s, barang_items=%s
             WHERE id=%s""",
-            (current_user.id, note, id))
-        _log(current_user.id, 'APPROVE', f'User: Surat #{id} → Dikonfirmasi')
+            (decision, current_user.id, note, json.dumps(barang_items, ensure_ascii=False), id))
+        label = 'Sesuai' if decision == 'sesuai' else 'Tidak Sesuai'
+        _log(current_user.id, 'APPROVE', f'User/Pemberi Kerja: Surat #{id} → {label}')
         # Notify satpam users
         satpams = _q(conn, "SELECT id FROM users WHERE role IN ('satpam','admin') AND is_active=1")
         for s in satpams:
             if s['id'] != current_user.id:
-                _notify(s['id'], 'Perlu Pemeriksaan Satpam', f'Surat {surat["no_surat"]} dikonfirmasi oleh pembuat, perlu pemeriksaan', f'/surat/{id}')
+                _notify(s['id'], 'Perlu Pemeriksaan Satpam', f'Surat {surat["no_surat"]} sudah dicek User/Pemberi Kerja ({label}), perlu pemeriksaan', f'/surat/{id}')
     elif stage == 'satpam':
         if current_user.role not in ('satpam', 'admin'):
             abort(403)
-        if surat.get('approval_user') != 'confirmed':
-            flash('Pemohon belum mengkonfirmasi surat ini.', 'warning')
+        if surat.get('approval_user') not in ('sesuai', 'tidak_sesuai'):
+            flash('User/Pemberi Kerja belum memeriksa surat ini.', 'warning')
             return redirect(url_for('view_surat', id=id))
         if decision not in ('sesuai', 'tidak_sesuai'):
             flash('Keputusan tidak valid.', 'danger')
@@ -654,6 +663,13 @@ def export_pdf(id):
             surat[key + '_name'] = u['nama_lengkap'] if u else '-'
         else:
             surat[key + '_name'] = ''
+    # Look up creator name for Pemohon
+    creator_id = surat.get('created_by')
+    if creator_id:
+        creator = _q(conn, "SELECT nama_lengkap FROM users WHERE id=%s", (creator_id,), one=True)
+        surat['creator_name'] = creator['nama_lengkap'] if creator else '-'
+    else:
+        surat['creator_name'] = ''
     conn.close()
 
     html = render_template('pdf_template.html', surat=surat,

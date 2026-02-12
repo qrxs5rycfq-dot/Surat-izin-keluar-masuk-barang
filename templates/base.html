@@ -259,7 +259,7 @@ function loadNotifications() {
                 return;
             }
             list.innerHTML = data.map(n => `
-                <a href="${n.link || '#'}" onclick="markRead(${n.id})" class="flex items-start gap-3 px-4 py-3.5 hover:bg-blue-50/50 transition-colors ${n.is_read ? 'opacity-50' : ''}">
+                <a href="${n.link || '#'}" onclick="markRead(${n.id}, event)" class="flex items-start gap-3 px-4 py-3.5 hover:bg-blue-50/50 transition-colors ${n.is_read ? 'opacity-50' : ''}">
                     <div class="flex-shrink-0 mt-0.5">
                         <div class="w-9 h-9 rounded-xl flex items-center justify-center ${n.is_read ? 'bg-gray-100' : 'bg-gradient-to-br from-blue-500 to-indigo-500'}">
                             <i class="fas fa-file-alt text-sm ${n.is_read ? 'text-gray-400' : 'text-white'}"></i>
@@ -279,11 +279,16 @@ function loadNotifications() {
         .catch(() => {});
 }
 
-function markRead(id) {
+function markRead(id, event) {
+    if (event) event.preventDefault();
+    const link = event ? event.currentTarget.href : null;
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
     const headers = {'Content-Type': 'application/json'};
     if (csrfMeta) headers['X-CSRFToken'] = csrfMeta.content;
-    fetch(`/api/notifications/${id}/read`, {method: 'POST', headers: headers}).catch(() => {});
+    fetch(`/api/notifications/${id}/read`, {method: 'POST', headers: headers})
+        .finally(() => {
+            if (link && link !== '#' && !link.endsWith('#')) window.location.href = link;
+        });
 }
 
 function markAllRead() {
