@@ -54,6 +54,7 @@
             <th>Satuan</th>
             <th>Keterangan</th>
             <th>Foto</th>
+            <th>Cek User</th>
             <th>Cek Satpam</th>
             <th>Status</th>
         </tr>
@@ -76,6 +77,13 @@
                 {% for f in item.foto %}
                 <img src="file://{{ upload_dir }}/{{ f }}" style="max-height:30px;max-width:35px;border-radius:2px;margin:1px;" alt="">
                 {% endfor %}
+                {% else %}-{% endif %}
+            </td>
+            <td style="text-align:center">
+                {% if item.approval_user == 'sesuai' %}
+                <span class="stamp-ok">✓</span>
+                {% elif item.approval_user == 'tidak_sesuai' %}
+                <span class="stamp-no">✗</span>
                 {% else %}-{% endif %}
             </td>
             <td style="text-align:center">

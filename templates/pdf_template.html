@@ -147,7 +147,7 @@
             <div class="sig-date">{{ surat.approval_user_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">________________</div>
+            <div class="sig-name">{{ surat.approval_user_by_name or '________________' }}</div>
             <div class="sig-role">User / Pemberi Kerja</div>
         </div>
         <!-- Satpam -->
@@ -166,7 +166,7 @@
             <div class="sig-date">{{ surat.approval_satpam_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">________________</div>
+            <div class="sig-name">{{ surat.approval_satpam_by_name or '________________' }}</div>
             <div class="sig-role">Satpam</div>
         </div>
         <!-- Asman Umum -->
@@ -185,7 +185,7 @@
             <div class="sig-date">{{ surat.approval_asman_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">________________</div>
+            <div class="sig-name">{{ surat.approval_asman_by_name or '________________' }}</div>
             <div class="sig-role">Asman Umum</div>
         </div>
         <!-- Manager Administrasi -->
@@ -204,7 +204,7 @@
             <div class="sig-date">{{ surat.approval_manager_at }}</div>
             {% endif %}
             <div class="sig-line"></div>
-            <div class="sig-name">________________</div>
+            <div class="sig-name">{{ surat.approval_manager_by_name or '________________' }}</div>
             <div class="sig-role">Manager Administrasi</div>
         </div>
     </div>

@@ -87,6 +87,7 @@
                     <th class="px-3 py-2.5 text-center">Satuan</th>
                     <th class="px-3 py-2.5 text-left">Keterangan</th>
                     <th class="px-3 py-2.5 text-center">Foto</th>
+                    <th class="px-3 py-2.5 text-center">Cek User</th>
                     <th class="px-3 py-2.5 text-center">Cek Satpam</th>
                     <th class="px-3 py-2.5 text-center">Status</th>
                 </tr>
@@ -114,6 +115,13 @@
                             </a>
                             {% endfor %}
                         </div>
+                        {% else %}<span class="text-gray-400 text-xs">-</span>{% endif %}
+                    </td>
+                    <td class="px-3 py-2 text-center">
+                        {% if item.approval_user == 'sesuai' %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-check"></i></span>
+                        {% elif item.approval_user == 'tidak_sesuai' %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700"><i class="fas fa-times"></i></span>
                         {% else %}<span class="text-gray-400 text-xs">-</span>{% endif %}
                     </td>
                     <td class="px-3 py-2 text-center">

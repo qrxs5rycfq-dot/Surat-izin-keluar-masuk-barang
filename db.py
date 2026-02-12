@@ -60,7 +60,7 @@ def init_db():
         username VARCHAR(50) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         nama_lengkap VARCHAR(100) NOT NULL,
-        role ENUM('admin','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff',
+        role ENUM('admin','user','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff',
         divisi VARCHAR(50),
         is_active TINYINT(1) DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -190,11 +190,11 @@ def init_db():
     except Exception:
         pass
 
-    # Ensure users role ENUM includes satpam and asman
+    # Ensure users role ENUM includes user, satpam and asman
     try:
         cur.execute(
             "ALTER TABLE `users` MODIFY COLUMN `role` "
-            "ENUM('admin','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff'"
+            "ENUM('admin','user','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff'"
         )
     except Exception:
         pass
@@ -240,6 +240,11 @@ def init_db():
         cur.execute(
             "INSERT INTO users (username,password,nama_lengkap,role,divisi) VALUES (%s,%s,%s,%s,%s)",
             ('asman01', pw5, 'Asman Umum', 'asman', 'UMUM'),
+        )
+        pw6 = bcrypt.hashpw(b'user123', bcrypt.gensalt()).decode()
+        cur.execute(
+            "INSERT INTO users (username,password,nama_lengkap,role,divisi) VALUES (%s,%s,%s,%s,%s)",
+            ('user01', pw6, 'User Pemberi Kerja', 'user', 'PEMELIHARAAN'),
         )
 
     # Seed sample surat if empty

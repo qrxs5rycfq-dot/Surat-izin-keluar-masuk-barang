@@ -520,8 +520,8 @@ def approve_surat(id):
         return redirect(url_for('surat_list'))
 
     if stage == 'user':
-        # User / Pemberi Kerja (staff or admin) — NOT the pemohon/creator
-        if current_user.role not in ('staff', 'admin'):
+        # User / Pemberi Kerja (user, staff, or admin) — NOT the pemohon/creator
+        if current_user.role not in ('user', 'staff', 'admin'):
             abort(403)
         if decision not in ('sesuai', 'tidak_sesuai'):
             flash('Keputusan tidak valid.', 'danger')
@@ -578,6 +578,9 @@ def approve_surat(id):
     elif stage == 'asman':
         if current_user.role not in ('asman', 'admin'):
             abort(403)
+        if surat.get('approval_satpam') == 'pending':
+            flash('Satpam belum memeriksa surat ini.', 'warning')
+            return redirect(url_for('view_surat', id=id))
         if decision not in ('approved', 'rejected'):
             flash('Keputusan tidak valid.', 'danger')
             return redirect(url_for('view_surat', id=id))
@@ -596,6 +599,9 @@ def approve_surat(id):
     elif stage == 'manager':
         if current_user.role not in ('manager', 'admin'):
             abort(403)
+        if surat.get('approval_asman') == 'pending':
+            flash('Asman belum mereview surat ini.', 'warning')
+            return redirect(url_for('view_surat', id=id))
         if decision not in ('approved', 'rejected'):
             flash('Keputusan tidak valid.', 'danger')
             return redirect(url_for('view_surat', id=id))
@@ -839,6 +845,7 @@ def _flatten_barang(rows):
                 'satuan': b.get('satuan', ''),
                 'keterangan': b.get('keterangan', ''),
                 'foto': b.get('foto', []),
+                'approval_user': b.get('approval_user', ''),
                 'approval_satpam': b.get('approval_satpam', ''),
             })
     return items
@@ -893,12 +900,12 @@ def report_barang_excel():
         top=Side(style='thin'), bottom=Side(style='thin'),
     )
 
-    ws.merge_cells('A1:L1')
+    ws.merge_cells('A1:M1')
     ws['A1'] = f'LAPORAN BARANG MASUK & KELUAR - {Config.COMPANY_NAME}'
     ws['A1'].font = Font(bold=True, size=14)
     ws['A1'].alignment = Alignment(horizontal='center')
 
-    ws.merge_cells('A2:L2')
+    ws.merge_cells('A2:M2')
     filters_text = f'Dicetak: {datetime.now().strftime("%d/%m/%Y %H:%M")}'
     jenis_f = request.args.get('jenis', '')
     status_f = request.args.get('status', '')
@@ -911,7 +918,7 @@ def report_barang_excel():
 
     headers = ['No', 'Jenis', 'No. Surat', 'Tanggal', 'Divisi', 'Pemohon',
                'Perusahaan', 'Nama Barang', 'Jumlah', 'Satuan', 'Keterangan',
-               'Cek Satpam']
+               'Cek User', 'Cek Satpam']
     for col, h in enumerate(headers, 1):
         cell = ws.cell(row=4, column=col, value=h)
         cell.font = header_font
@@ -920,6 +927,12 @@ def report_barang_excel():
         cell.border = thin_border
 
     for i, item in enumerate(items, 5):
+        user_approval_text = ''
+        if item['approval_user'] == 'sesuai':
+            user_approval_text = '✓ Sesuai'
+        elif item['approval_user'] == 'tidak_sesuai':
+            user_approval_text = '✗ Tidak Sesuai'
+
         approval_text = ''
         if item['approval_satpam'] == 'sesuai':
             approval_text = '✓ Sesuai'
@@ -930,17 +943,21 @@ def report_barang_excel():
                 str(item['tanggal']), item['divisi'], item['nama_pemohon'],
                 item['perusahaan'], item['nama_barang'],
                 item['jumlah'], item['satuan'],
-                item['keterangan'] or '-', approval_text]
+                item['keterangan'] or '-', user_approval_text, approval_text]
         for col, v in enumerate(vals, 1):
             cell = ws.cell(row=i, column=col, value=v)
             cell.border = thin_border
-            cell.alignment = Alignment(horizontal='center' if col in (1, 2, 9, 10, 12) else 'left')
-            if col == 12 and item['approval_satpam'] == 'sesuai':
+            cell.alignment = Alignment(horizontal='center' if col in (1, 2, 9, 10, 12, 13) else 'left')
+            if col == 12 and item['approval_user'] == 'sesuai':
                 cell.fill = green_fill
-            elif col == 12 and item['approval_satpam'] == 'tidak_sesuai':
+            elif col == 12 and item['approval_user'] == 'tidak_sesuai':
+                cell.fill = red_fill
+            if col == 13 and item['approval_satpam'] == 'sesuai':
+                cell.fill = green_fill
+            elif col == 13 and item['approval_satpam'] == 'tidak_sesuai':
                 cell.fill = red_fill
 
-        # Add photos in column M onward
+        # Add photos in column N onward
         if item['foto']:
             foto_col = len(headers) + 1
             for foto_name in item['foto']:
@@ -1041,7 +1058,7 @@ def toggle_user(uid):
 @role_required('admin')
 def change_role(uid):
     new_role = request.form.get('role')
-    if new_role not in ('admin', 'staff', 'manager', 'satpam', 'asman'):
+    if new_role not in ('admin', 'user', 'staff', 'manager', 'satpam', 'asman'):
         flash('Role tidak valid.', 'danger')
         return redirect(url_for('user_list'))
     conn = get_db()

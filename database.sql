@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     nama_lengkap VARCHAR(100) NOT NULL,
-    role ENUM('admin','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff',
+    role ENUM('admin','user','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff',
     divisi VARCHAR(50),
     is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
