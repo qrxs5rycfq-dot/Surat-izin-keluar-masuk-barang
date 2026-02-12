@@ -305,14 +305,34 @@
         </div>
 
         <!-- Lampiran foto -->
-        {% if surat.foto_list %}
+        {% set has_item_foto = surat.barang_items | selectattr('foto') | list | length > 0 %}
+        {% if surat.foto_list or has_item_foto %}
         <div class="bg-white rounded-xl shadow-sm border p-6">
-            <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto ({{ surat.foto_list|length }})</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {% for foto in surat.foto_list %}
-                <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="rounded-lg shadow max-w-full" alt="Lampiran {{ loop.index }}">
-                {% endfor %}
+            <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h4>
+            {% for item in surat.barang_items %}
+            {% if item.foto %}
+            <div class="mb-4">
+                <p class="text-sm font-semibold text-gray-600 mb-2"><i class="fas fa-box text-blue-400 mr-1"></i> {{ item.nama_barang }}</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {% for f in item.foto %}
+                    <a href="{{ url_for('static', filename='uploads/' + f) }}" target="_blank">
+                        <img src="{{ url_for('static', filename='uploads/' + f) }}" class="rounded-lg shadow max-w-full hover:opacity-90 transition" alt="{{ item.nama_barang }}">
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
+            {% endif %}
+            {% endfor %}
+            {% if surat.foto_list %}
+            <div class="mt-4{% if has_item_foto %} pt-4 border-t{% endif %}">
+                <p class="text-sm font-semibold text-gray-600 mb-2"><i class="fas fa-paperclip text-blue-400 mr-1"></i> Lampiran Umum</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {% for foto in surat.foto_list %}
+                    <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="rounded-lg shadow max-w-full" alt="Lampiran {{ loop.index }}">
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
     </div>

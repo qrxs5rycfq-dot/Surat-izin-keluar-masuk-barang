@@ -235,13 +235,30 @@
 
 <p class="section-title">LAMPIRAN FOTO</p>
 <div class="foto-box">
-    {% if surat.foto_list %}
-    {% set count = surat.foto_list|length %}
-    <div class="foto-grid {{ 'foto-1' if count == 1 else ('foto-2' if count == 2 else ('foto-3' if count <= 4 else 'foto-many')) }}">
-        {% for foto in surat.foto_list %}
-        <img src="file://{{ upload_dir }}/{{ foto }}" alt="Lampiran {{ loop.index }}">
-        {% endfor %}
+    {% set has_item_foto = surat.barang_items | selectattr('foto') | list | length > 0 %}
+    {% if has_item_foto or surat.foto_list %}
+    {% for item in surat.barang_items %}
+    {% if item.foto %}
+    <div style="margin-bottom:8px;">
+        <p style="font-size:8.5pt;font-weight:bold;color:#1e40af;margin:0 0 4px 0;"><span style="color:#6b7280">▪</span> {{ item.nama_barang }}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            {% for f in item.foto %}
+            <img src="file://{{ upload_dir }}/{{ f }}" style="max-height:100px;max-width:120px;border-radius:4px;border:1px solid #e5e7eb;" alt="{{ item.nama_barang }}">
+            {% endfor %}
+        </div>
     </div>
+    {% endif %}
+    {% endfor %}
+    {% if surat.foto_list %}
+    <div style="margin-top:8px;{% if has_item_foto %}padding-top:6px;border-top:1px dashed #d1d5db;{% endif %}">
+        <p style="font-size:8.5pt;font-weight:bold;color:#1e40af;margin:0 0 4px 0;"><span style="color:#6b7280">▪</span> Lampiran Umum</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            {% for foto in surat.foto_list %}
+            <img src="file://{{ upload_dir }}/{{ foto }}" style="max-height:100px;max-width:120px;border-radius:4px;border:1px solid #e5e7eb;" alt="Lampiran {{ loop.index }}">
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
     {% else %}
     <p style="color:#999;margin-top:80px;font-size:9pt">Foto barang yang akan di{{ 'keluarkan' if surat.jenis=='keluar' else 'masukkan' }}</p>
     {% endif %}
