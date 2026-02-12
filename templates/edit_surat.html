@@ -115,9 +115,11 @@
 {% block scripts %}
 <script>
 let rowNum = 0;
+let extraData = {};
 function addRow(d) {
     d = d || {};
     rowNum++;
+    extraData[rowNum] = {foto: d.foto || [], approval_user: d.approval_user || '', approval_satpam: d.approval_satpam || ''};
     // Desktop table row
     const tbody = document.getElementById('barangBody');
     const tr = document.createElement('tr');
@@ -165,6 +167,7 @@ function removeRow(idx) {
     const mc = document.querySelector(`#barangMobile div[data-idx="${idx}"]`);
     if (tr) tr.remove();
     if (mc) mc.remove();
+    delete extraData[idx];
     renum(); sync();
 }
 function renum(){
@@ -174,7 +177,14 @@ function renum(){
 function sync(){
     const items=[];
     document.querySelectorAll('#barangBody tr').forEach(tr=>{
-        items.push({nama_barang:tr.querySelector('.bn').value,jumlah:tr.querySelector('.bj').value,satuan:tr.querySelector('.bs').value,keterangan:tr.querySelector('.bk').value});
+        const idx = parseInt(tr.dataset.idx);
+        const item = {nama_barang:tr.querySelector('.bn').value,jumlah:tr.querySelector('.bj').value,satuan:tr.querySelector('.bs').value,keterangan:tr.querySelector('.bk').value};
+        if (extraData[idx]) {
+            if (extraData[idx].foto && extraData[idx].foto.length) item.foto = extraData[idx].foto;
+            if (extraData[idx].approval_user) item.approval_user = extraData[idx].approval_user;
+            if (extraData[idx].approval_satpam) item.approval_satpam = extraData[idx].approval_satpam;
+        }
+        items.push(item);
     });
     document.getElementById('barangItems').value=JSON.stringify(items);
 }

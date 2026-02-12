@@ -521,7 +521,7 @@ def approve_surat(id):
 
     if stage == 'user':
         # User / Pemberi Kerja (user, staff, or admin) — NOT the pemohon/creator
-        if current_user.role not in ('user', 'staff', 'admin'):
+        if current_user.role not in ('user', 'admin'):
             abort(403)
         if decision not in ('sesuai', 'tidak_sesuai'):
             flash('Keputusan tidak valid.', 'danger')
