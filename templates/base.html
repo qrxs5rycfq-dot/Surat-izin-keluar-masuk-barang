@@ -95,6 +95,9 @@
             <a href="{{ url_for('export_report_pdf') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition">
                 <i class="fas fa-file-pdf w-5 text-center flex-shrink-0"></i> <span class="sidebar-text">Export PDF</span>
             </a>
+            <a href="{{ url_for('report_barang') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-white/10 transition {{ 'active' if request.endpoint == 'report_barang' }}">
+                <i class="fas fa-chart-bar w-5 text-center flex-shrink-0"></i> <span class="sidebar-text">Laporan Barang</span>
+            </a>
 
             {% if current_user.role == 'admin' %}
             <div class="pt-3 pb-1">

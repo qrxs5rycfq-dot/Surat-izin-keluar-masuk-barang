@@ -374,13 +374,20 @@ def view_surat(id):
         surat['barang_items'] = []
     surat['foto_list'] = _parse_foto_list(surat.get('lampiran_foto'))
     # Look up approver names for signature section
-    for key in ('approval_satpam_by', 'approval_asman_by', 'approval_manager_by'):
+    for key in ('approval_user_by', 'approval_satpam_by', 'approval_asman_by', 'approval_manager_by'):
         uid = surat.get(key)
         if uid:
             u = _q(conn, "SELECT nama_lengkap FROM users WHERE id=%s", (uid,), one=True)
             surat[key + '_name'] = u['nama_lengkap'] if u else '-'
         else:
             surat[key + '_name'] = ''
+    # Also look up creator name
+    creator_id = surat.get('created_by')
+    if creator_id:
+        creator = _q(conn, "SELECT nama_lengkap FROM users WHERE id=%s", (creator_id,), one=True)
+        surat['creator_name'] = creator['nama_lengkap'] if creator else '-'
+    else:
+        surat['creator_name'] = ''
     conn.close()
     return render_template('view_surat.html', surat=surat)
 
@@ -500,7 +507,7 @@ def update_status(id):
 @app.route('/surat/<int:id>/approve', methods=['POST'])
 @login_required
 def approve_surat(id):
-    """Multi-stage approval: Satpam -> Asman Umum -> Manager Administrasi"""
+    """Multi-stage approval: User -> Satpam -> Asman Umum -> Manager Administrasi"""
     stage = request.form.get('stage')
     decision = request.form.get('decision')
     note = request.form.get('note', '')
@@ -512,9 +519,30 @@ def approve_surat(id):
         flash('Surat tidak ditemukan.', 'danger')
         return redirect(url_for('surat_list'))
 
-    if stage == 'satpam':
+    if stage == 'user':
+        # Only the creator or admin can confirm
+        if current_user.id != surat.get('created_by') and current_user.role != 'admin':
+            abort(403)
+        if decision != 'confirmed':
+            flash('Keputusan tidak valid.', 'danger')
+            return redirect(url_for('view_surat', id=id))
+        _exec(conn, """UPDATE surat_izin SET
+            approval_user='confirmed', approval_user_by=%s, approval_user_at=NOW(),
+            approval_user_note=%s
+            WHERE id=%s""",
+            (current_user.id, note, id))
+        _log(current_user.id, 'APPROVE', f'User: Surat #{id} → Dikonfirmasi')
+        # Notify satpam users
+        satpams = _q(conn, "SELECT id FROM users WHERE role IN ('satpam','admin') AND is_active=1")
+        for s in satpams:
+            if s['id'] != current_user.id:
+                _notify(s['id'], 'Perlu Pemeriksaan Satpam', f'Surat {surat["no_surat"]} dikonfirmasi oleh pembuat, perlu pemeriksaan', f'/surat/{id}')
+    elif stage == 'satpam':
         if current_user.role not in ('satpam', 'admin'):
             abort(403)
+        if surat.get('approval_user') != 'confirmed':
+            flash('Pemohon belum mengkonfirmasi surat ini.', 'warning')
+            return redirect(url_for('view_surat', id=id))
         if decision not in ('sesuai', 'tidak_sesuai'):
             flash('Keputusan tidak valid.', 'danger')
             return redirect(url_for('view_surat', id=id))
@@ -619,7 +647,7 @@ def export_pdf(id):
     surat['foto_list'] = _parse_foto_list(surat.get('lampiran_foto'))
 
     # Look up approver names for the signature section
-    for key in ('approval_satpam_by', 'approval_asman_by', 'approval_manager_by'):
+    for key in ('approval_user_by', 'approval_satpam_by', 'approval_asman_by', 'approval_manager_by'):
         uid = surat.get(key)
         if uid:
             u = _q(conn, "SELECT nama_lengkap FROM users WHERE id=%s", (uid,), one=True)
@@ -742,6 +770,225 @@ def export_report_pdf():
     except Exception as e:
         flash(f'Gagal membuat PDF: {e}', 'danger')
         return redirect(url_for('dashboard'))
+
+
+# ---------------------------------------------------------------------------
+# Barang Report (with filtering, search, PDF & Excel export)
+# ---------------------------------------------------------------------------
+def _build_barang_query(params):
+    """Build SQL query and param list from filter request args."""
+    jenis = params.get('jenis', '')
+    status = params.get('status', '')
+    date_from = params.get('date_from', '')
+    date_to = params.get('date_to', '')
+    search = params.get('q', '')
+
+    q = "SELECT * FROM surat_izin WHERE 1=1"
+    p = []
+    if jenis:
+        q += " AND jenis=%s"; p.append(jenis)
+    if status:
+        q += " AND status=%s"; p.append(status)
+    if date_from:
+        q += " AND tanggal >= %s"; p.append(date_from)
+    if date_to:
+        q += " AND tanggal <= %s"; p.append(date_to)
+    if search:
+        q += " AND (no_surat LIKE %s OR nama LIKE %s OR perusahaan LIKE %s)"
+        p.extend([f'%{search}%'] * 3)
+    q += " ORDER BY tanggal DESC"
+    return q, p
+
+
+def _flatten_barang(rows):
+    """Flatten surat rows into per-item barang records for reporting."""
+    items = []
+    for r in rows:
+        try:
+            barang = json.loads(r['barang_items']) if r['barang_items'] else []
+        except (json.JSONDecodeError, TypeError):
+            barang = []
+        for b in barang:
+            items.append({
+                'surat_id': r['id'],
+                'jenis': r['jenis'],
+                'no_surat': r['no_surat'],
+                'tanggal': r['tanggal'],
+                'divisi': r['divisi'],
+                'nama_pemohon': r['nama'],
+                'perusahaan': r['perusahaan'],
+                'status': r['status'],
+                'nama_barang': b.get('nama_barang', ''),
+                'jumlah': b.get('jumlah', ''),
+                'satuan': b.get('satuan', ''),
+                'keterangan': b.get('keterangan', ''),
+                'foto': b.get('foto', []),
+                'approval_satpam': b.get('approval_satpam', ''),
+            })
+    return items
+
+
+@app.route('/report/barang')
+@login_required
+def report_barang():
+    conn = get_db()
+    q, p = _build_barang_query(request.args)
+    rows = _q(conn, q, p)
+    conn.close()
+    items = _flatten_barang(rows)
+
+    total_keluar = sum(1 for r in rows if r['jenis'] == 'keluar')
+    total_masuk = sum(1 for r in rows if r['jenis'] == 'masuk')
+
+    return render_template('report_barang.html', items=items,
+                           total_keluar=total_keluar, total_masuk=total_masuk,
+                           total_barang=len(items),
+                           jenis=request.args.get('jenis', ''),
+                           status=request.args.get('status', ''),
+                           date_from=request.args.get('date_from', ''),
+                           date_to=request.args.get('date_to', ''),
+                           search=request.args.get('q', ''))
+
+
+@app.route('/report/barang/excel')
+@login_required
+def report_barang_excel():
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.drawing.image import Image as XlImage
+
+    conn = get_db()
+    q, p = _build_barang_query(request.args)
+    rows = _q(conn, q, p)
+    conn.close()
+    items = _flatten_barang(rows)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Laporan Barang"
+
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+    green_fill = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+    red_fill = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin'),
+    )
+
+    ws.merge_cells('A1:L1')
+    ws['A1'] = f'LAPORAN BARANG MASUK & KELUAR - {Config.COMPANY_NAME}'
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal='center')
+
+    ws.merge_cells('A2:L2')
+    filters_text = f'Dicetak: {datetime.now().strftime("%d/%m/%Y %H:%M")}'
+    jenis_f = request.args.get('jenis', '')
+    status_f = request.args.get('status', '')
+    if jenis_f:
+        filters_text += f' | Jenis: {jenis_f.upper()}'
+    if status_f:
+        filters_text += f' | Status: {status_f.upper()}'
+    ws['A2'] = filters_text
+    ws['A2'].alignment = Alignment(horizontal='center')
+
+    headers = ['No', 'Jenis', 'No. Surat', 'Tanggal', 'Divisi', 'Pemohon',
+               'Perusahaan', 'Nama Barang', 'Jumlah', 'Satuan', 'Keterangan',
+               'Cek Satpam']
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=4, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+        cell.border = thin_border
+
+    for i, item in enumerate(items, 5):
+        approval_text = ''
+        if item['approval_satpam'] == 'sesuai':
+            approval_text = '✓ Sesuai'
+        elif item['approval_satpam'] == 'tidak_sesuai':
+            approval_text = '✗ Tidak Sesuai'
+
+        vals = [i - 4, item['jenis'].upper(), item['no_surat'],
+                str(item['tanggal']), item['divisi'], item['nama_pemohon'],
+                item['perusahaan'], item['nama_barang'],
+                item['jumlah'], item['satuan'],
+                item['keterangan'] or '-', approval_text]
+        for col, v in enumerate(vals, 1):
+            cell = ws.cell(row=i, column=col, value=v)
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal='center' if col in (1, 2, 9, 10, 12) else 'left')
+            if col == 12 and item['approval_satpam'] == 'sesuai':
+                cell.fill = green_fill
+            elif col == 12 and item['approval_satpam'] == 'tidak_sesuai':
+                cell.fill = red_fill
+
+        # Add photos in column M onward
+        if item['foto']:
+            foto_col = len(headers) + 1
+            for foto_name in item['foto']:
+                foto_path = os.path.join(Config.UPLOAD_DIR, foto_name)
+                if os.path.exists(foto_path):
+                    try:
+                        img = XlImage(foto_path)
+                        img.width = 60
+                        img.height = 60
+                        from openpyxl.utils import get_column_letter
+                        cell_ref = f'{get_column_letter(foto_col)}{i}'
+                        ws.add_image(img, cell_ref)
+                        ws.row_dimensions[i].height = 50
+                        foto_col += 1
+                    except Exception:
+                        pass
+
+    # Auto-size columns
+    from openpyxl.utils import get_column_letter
+    for col_idx in range(1, len(headers) + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 10
+        for row_cells in ws.iter_rows(min_col=col_idx, max_col=col_idx, min_row=4):
+            for cell in row_cells:
+                if cell.value is not None:
+                    max_len = max(max_len, len(str(cell.value)))
+        ws.column_dimensions[col_letter].width = min(max_len + 4, 40)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return send_file(buf, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     as_attachment=True,
+                     download_name=f'laporan_barang_{datetime.now().strftime("%Y%m%d")}.xlsx')
+
+
+@app.route('/report/barang/pdf')
+@login_required
+def report_barang_pdf():
+    conn = get_db()
+    q, p = _build_barang_query(request.args)
+    rows = _q(conn, q, p)
+    conn.close()
+    items = _flatten_barang(rows)
+
+    total_keluar = sum(1 for r in rows if r['jenis'] == 'keluar')
+    total_masuk = sum(1 for r in rows if r['jenis'] == 'masuk')
+
+    html = render_template('report_barang_pdf.html', items=items,
+                           total_keluar=total_keluar, total_masuk=total_masuk,
+                           total_barang=len(items),
+                           upload_dir=os.path.abspath(Config.UPLOAD_DIR))
+    try:
+        from weasyprint import HTML
+        from pathlib import Path
+        base = Path(app.root_path, 'static').as_uri() + '/'
+        pdf_bytes = HTML(string=html, base_url=base).write_pdf()
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype='application/pdf', as_attachment=True,
+            download_name=f'laporan_barang_{datetime.now().strftime("%Y%m%d")}.pdf',
+        )
+    except Exception as e:
+        flash(f'Gagal membuat PDF: {e}', 'danger')
+        return redirect(url_for('report_barang'))
 
 
 # ---------------------------------------------------------------------------

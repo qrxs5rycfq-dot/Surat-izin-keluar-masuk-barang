@@ -67,7 +67,11 @@ CREATE TABLE IF NOT EXISTS surat_izin (
     status ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending',
     catatan TEXT,
 
-    -- Multi-stage approval
+    -- Multi-stage approval (User -> Satpam -> Asman -> Manager)
+    approval_user ENUM('pending','confirmed') DEFAULT 'pending',
+    approval_user_by INT,
+    approval_user_at TIMESTAMP NULL,
+    approval_user_note TEXT,
     approval_satpam ENUM('pending','sesuai','tidak_sesuai') DEFAULT 'pending',
     approval_satpam_by INT,
     approval_satpam_at TIMESTAMP NULL,
