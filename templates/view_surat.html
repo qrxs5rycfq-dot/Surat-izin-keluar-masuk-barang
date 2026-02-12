@@ -131,7 +131,7 @@
                     {% if surat.approval_user_at %}<p class="text-[10px] text-gray-400">{{ surat.approval_user_at }}</p>{% endif %}
                     <div class="mb-2">&nbsp;</div>
                     <div class="border-t-2 border-blue-500 pt-2">
-                        <p class="font-semibold text-gray-800">{{ surat.approval_user_by_name or surat.pemohon }}</p>
+                        <p class="font-semibold text-gray-800">{{ surat.approval_user_by_name or '________________' }}</p>
                         <p class="text-xs text-gray-400">Pemohon</p>
                     </div>
                 </div>

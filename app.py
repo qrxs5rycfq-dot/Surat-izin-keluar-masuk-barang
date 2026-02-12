@@ -856,6 +856,7 @@ def report_barang_excel():
     from openpyxl import Workbook
     from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
     from openpyxl.drawing.image import Image as XlImage
+    from openpyxl.utils import get_column_letter
 
     conn = get_db()
     q, p = _build_barang_query(request.args)
@@ -933,7 +934,6 @@ def report_barang_excel():
                         img = XlImage(foto_path)
                         img.width = 60
                         img.height = 60
-                        from openpyxl.utils import get_column_letter
                         cell_ref = f'{get_column_letter(foto_col)}{i}'
                         ws.add_image(img, cell_ref)
                         ws.row_dimensions[i].height = 50
@@ -942,7 +942,6 @@ def report_barang_excel():
                         pass
 
     # Auto-size columns
-    from openpyxl.utils import get_column_letter
     for col_idx in range(1, len(headers) + 1):
         col_letter = get_column_letter(col_idx)
         max_len = 10
