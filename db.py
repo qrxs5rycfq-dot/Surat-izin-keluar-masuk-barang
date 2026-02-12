@@ -88,7 +88,7 @@ def init_db():
         lampiran_foto TEXT,
         status ENUM('pending','review','approved','rejected') NOT NULL DEFAULT 'pending',
         catatan TEXT,
-        approval_user ENUM('pending','confirmed') DEFAULT 'pending',
+        approval_user ENUM('pending','sesuai','tidak_sesuai') DEFAULT 'pending',
         approval_user_by INT,
         approval_user_at TIMESTAMP NULL,
         approval_user_note TEXT,
@@ -163,7 +163,7 @@ def init_db():
         ('catatan',         "TEXT AFTER `status`"),
         ('created_by',      "INT AFTER `catatan`"),
         ('updated_at',      "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`"),
-        ('approval_user',        "ENUM('pending','confirmed') DEFAULT 'pending' AFTER `catatan`"),
+        ('approval_user',        "ENUM('pending','sesuai','tidak_sesuai') DEFAULT 'pending' AFTER `catatan`"),
         ('approval_user_by',     "INT AFTER `approval_user`"),
         ('approval_user_at',     "TIMESTAMP NULL AFTER `approval_user_by`"),
         ('approval_user_note',   "TEXT AFTER `approval_user_at`"),
@@ -195,6 +195,15 @@ def init_db():
         cur.execute(
             "ALTER TABLE `users` MODIFY COLUMN `role` "
             "ENUM('admin','staff','manager','satpam','asman') NOT NULL DEFAULT 'staff'"
+        )
+    except Exception:
+        pass
+
+    # Ensure approval_user ENUM includes sesuai and tidak_sesuai
+    try:
+        cur.execute(
+            "ALTER TABLE `surat_izin` MODIFY COLUMN `approval_user` "
+            "ENUM('pending','sesuai','tidak_sesuai') DEFAULT 'pending'"
         )
     except Exception:
         pass
