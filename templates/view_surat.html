@@ -56,10 +56,16 @@
                 <div class="bg-gray-50 rounded-lg overflow-hidden mb-6">
                     <table class="w-full text-sm">
                         <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600 w-40">Nama</td><td class="px-4 py-2.5">{{ surat.nama }}</td></tr>
+                        {% if surat.foto_ktp %}
+                        <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">Foto KTP/Identitas</td><td class="px-4 py-2.5"><a href="{{ url_for('static', filename='uploads/' + surat.foto_ktp) }}" target="_blank"><img src="{{ url_for('static', filename='uploads/' + surat.foto_ktp) }}" class="h-24 rounded-lg border hover:opacity-90 transition" alt="KTP"></a></td></tr>
+                        {% endif %}
                         <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">Badge</td><td class="px-4 py-2.5">{{ surat.badge }}</td></tr>
                         <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">No. Kendaraan</td><td class="px-4 py-2.5">{{ surat.no_kendaraan }}</td></tr>
                         <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">Perusahaan</td><td class="px-4 py-2.5">{{ surat.perusahaan }}</td></tr>
-                        <tr><td class="px-4 py-2.5 font-medium text-gray-600">No. SPK/MEMO</td><td class="px-4 py-2.5">{{ surat.no_spk }}</td></tr>
+                        <tr class="border-b"><td class="px-4 py-2.5 font-medium text-gray-600">No. SPK/MEMO</td><td class="px-4 py-2.5">{{ surat.no_spk }}</td></tr>
+                        {% if surat.file_spk %}
+                        <tr><td class="px-4 py-2.5 font-medium text-gray-600">File SPK</td><td class="px-4 py-2.5"><a href="{{ url_for('static', filename='uploads/' + surat.file_spk) }}" target="_blank" class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 hover:bg-green-100 px-3 py-1.5 rounded-lg text-sm font-medium transition"><i class="fas fa-download"></i> Download File SPK</a></td></tr>
+                        {% endif %}
                     </table>
                 </div>
 
@@ -304,11 +310,11 @@
             </div>
         </div>
 
-        <!-- Lampiran foto -->
+        <!-- Lampiran foto (dari foto barang) -->
         {% set has_item_foto = surat.barang_items | selectattr('foto') | list | length > 0 %}
-        {% if surat.foto_list or has_item_foto %}
+        {% if has_item_foto %}
         <div class="bg-white rounded-xl shadow-sm border p-6">
-            <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h4>
+            <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto Barang</h4>
             {% for item in surat.barang_items %}
             {% if item.foto %}
             <div class="mb-4">
@@ -323,16 +329,6 @@
             </div>
             {% endif %}
             {% endfor %}
-            {% if surat.foto_list %}
-            <div class="mt-4{% if has_item_foto %} pt-4 border-t{% endif %}">
-                <p class="text-sm font-semibold text-gray-600 mb-2"><i class="fas fa-paperclip text-blue-400 mr-1"></i> Lampiran Umum</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {% for foto in surat.foto_list %}
-                    <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="rounded-lg shadow max-w-full" alt="Lampiran {{ loop.index }}">
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
         </div>
         {% endif %}
     </div>

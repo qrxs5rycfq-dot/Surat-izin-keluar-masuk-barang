@@ -50,11 +50,41 @@
     <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
         <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-user text-blue-500"></i> Data Pemohon</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label><input type="text" name="nama" value="{{ surat.nama }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Badge <span class="text-red-500">*</span></label><input type="text" name="badge" value="{{ surat.badge }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Perusahaan <span class="text-red-500">*</span></label><input type="text" name="perusahaan" value="{{ surat.perusahaan }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">No. Kendaraan <span class="text-red-500">*</span></label><input type="text" name="no_kendaraan" value="{{ surat.no_kendaraan }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-            <div class="sm:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">No. SPK/MEMO <span class="text-red-500">*</span></label><input type="text" name="no_spk" value="{{ surat.no_spk }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label>
+                <input type="text" name="nama" value="{{ surat.nama }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Foto KTP / Identitas</label>
+                {% if surat.foto_ktp %}
+                <div class="mb-1"><img src="{{ url_for('static', filename='uploads/' + surat.foto_ktp) }}" class="h-16 rounded border"></div>
+                {% endif %}
+                <input type="file" name="foto_ktp" accept="image/*" class="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Badge <span class="text-red-500">*</span></label>
+                <input type="text" name="badge" value="{{ surat.badge }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Perusahaan <span class="text-red-500">*</span></label>
+                <input type="text" name="perusahaan" value="{{ surat.perusahaan }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. Kendaraan <span class="text-red-500">*</span></label>
+                <input type="text" name="no_kendaraan" value="{{ surat.no_kendaraan }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">No. SPK/MEMO <span class="text-red-500">*</span></label>
+                <input type="text" name="no_spk" value="{{ surat.no_spk }}" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="sm:col-span-2 md:col-span-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">File SPK / Lampiran Dokumen</label>
+                {% if surat.file_spk %}
+                <div class="mb-1"><a href="{{ url_for('static', filename='uploads/' + surat.file_spk) }}" target="_blank" class="text-sm text-blue-600 hover:underline"><i class="fas fa-file-alt mr-1"></i>{{ surat.file_spk }}</a></div>
+                {% endif %}
+                <input type="file" name="file_spk" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                <p class="text-xs text-gray-400 mt-1">Format: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG</p>
+            </div>
         </div>
     </div>
 
@@ -76,23 +106,6 @@
         <!-- Mobile stacked -->
         <div id="barangMobile" class="sm:hidden space-y-3"></div>
         <input type="hidden" name="barang_items" id="barangItems">
-    </div>
-
-    <!-- Lampiran Foto -->
-    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
-        <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-camera text-blue-500"></i> Lampiran Foto</h3>
-        {% if surat.foto_list %}
-        <div class="mb-4">
-            <p class="text-sm text-gray-500 mb-2">Foto saat ini ({{ surat.foto_list|length }} foto):</p>
-            <div class="flex flex-wrap gap-3">
-                {% for foto in surat.foto_list %}
-                <img src="{{ url_for('static', filename='uploads/' + foto) }}" class="max-h-32 sm:max-h-48 rounded-lg shadow">
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        <input type="file" name="lampiran_foto" accept="image/*" multiple class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 w-full">
-        <p class="text-xs text-gray-400 mt-1">Pilih foto tambahan (bisa lebih dari satu). Foto lama tetap disimpan.</p>
     </div>
 
     <!-- Tanda Tangan -->

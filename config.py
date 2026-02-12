@@ -28,6 +28,7 @@ class Config:
     DOC_NO = 'ADP.17.01.015'
     DOC_REV = '2'
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    ALLOWED_DOC_EXTENSIONS = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg'}
 
     @staticmethod
     def init_app(app):

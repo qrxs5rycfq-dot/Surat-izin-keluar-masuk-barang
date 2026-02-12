@@ -81,6 +81,8 @@ def init_db():
         no_kendaraan VARCHAR(50) NOT NULL,
         perusahaan VARCHAR(100) NOT NULL,
         no_spk VARCHAR(100) NOT NULL,
+        foto_ktp VARCHAR(255),
+        file_spk VARCHAR(255),
         pemohon VARCHAR(100) NOT NULL,
         diperiksa_oleh VARCHAR(100) NOT NULL,
         disetujui_oleh VARCHAR(100) NOT NULL,
@@ -179,6 +181,8 @@ def init_db():
         ('approval_manager_by',  "INT AFTER `approval_manager`"),
         ('approval_manager_at',  "TIMESTAMP NULL AFTER `approval_manager_by`"),
         ('approval_manager_note',"TEXT AFTER `approval_manager_at`"),
+        ('foto_ktp',            "VARCHAR(255) AFTER `no_spk`"),
+        ('file_spk',            "VARCHAR(255) AFTER `foto_ktp`"),
     ])
 
     # Ensure status ENUM includes 'review' for existing tables

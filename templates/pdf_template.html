@@ -74,10 +74,13 @@
 <p class="section-title">DATA PEMOHON</p>
 <table class="data-table">
     <tr><td style="width:25%;font-weight:bold">NAMA</td><td>{{ surat.nama }}</td></tr>
+    {% if surat.foto_ktp %}
+    <tr><td style="font-weight:bold">FOTO KTP/IDENTITAS</td><td><img src="file://{{ upload_dir }}/{{ surat.foto_ktp }}" style="max-height:80px;border-radius:4px;border:1px solid #e5e7eb;" alt="KTP"></td></tr>
+    {% endif %}
     <tr><td style="font-weight:bold">BADGE</td><td>{{ surat.badge }}</td></tr>
     <tr><td style="font-weight:bold">NO KENDARAAN</td><td>{{ surat.no_kendaraan }}</td></tr>
     <tr><td style="font-weight:bold">PERUSAHAAN</td><td>{{ surat.perusahaan }}</td></tr>
-    <tr><td style="font-weight:bold">NO SPK/MEMO</td><td>{{ surat.no_spk }}</td></tr>
+    <tr><td style="font-weight:bold">NO SPK/MEMO</td><td>{{ surat.no_spk }}{% if spk_url %} &nbsp;<a href="{{ spk_url }}" style="color:#1e40af;font-size:8.5pt;text-decoration:underline;">📎 Download File SPK</a>{% endif %}</td></tr>
 </table>
 
 <p style="font-size:9.5pt;margin:10px 0;">
@@ -233,10 +236,10 @@
     </table>
 </div>
 
-<p class="section-title">LAMPIRAN FOTO</p>
+<p class="section-title">LAMPIRAN FOTO BARANG</p>
 <div class="foto-box">
     {% set has_item_foto = surat.barang_items | selectattr('foto') | list | length > 0 %}
-    {% if has_item_foto or surat.foto_list %}
+    {% if has_item_foto %}
     {% for item in surat.barang_items %}
     {% if item.foto %}
     <div style="margin-bottom:8px;">
@@ -249,16 +252,6 @@
     </div>
     {% endif %}
     {% endfor %}
-    {% if surat.foto_list %}
-    <div style="margin-top:8px;{% if has_item_foto %}padding-top:6px;border-top:1px dashed #d1d5db;{% endif %}">
-        <p style="font-size:8.5pt;font-weight:bold;color:#1e40af;margin:0 0 4px 0;"><span style="color:#6b7280">▪</span> Lampiran Umum</p>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">
-            {% for foto in surat.foto_list %}
-            <img src="file://{{ upload_dir }}/{{ foto }}" style="max-height:100px;max-width:120px;border-radius:4px;border:1px solid #e5e7eb;" alt="Lampiran {{ loop.index }}">
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
     {% else %}
     <p style="color:#999;margin-top:80px;font-size:9pt">Foto barang yang akan di{{ 'keluarkan' if surat.jenis=='keluar' else 'masukkan' }}</p>
     {% endif %}

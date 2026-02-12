@@ -52,6 +52,10 @@ CREATE TABLE IF NOT EXISTS surat_izin (
     perusahaan VARCHAR(100) NOT NULL,
     no_spk VARCHAR(100) NOT NULL,
 
+    -- Dokumen Pemohon
+    foto_ktp VARCHAR(255),
+    file_spk VARCHAR(255),
+
     -- Tanda Tangan
     pemohon VARCHAR(100) NOT NULL,
     diperiksa_oleh VARCHAR(100) NOT NULL,

@@ -32,6 +32,7 @@ login_manager.login_message = 'Silakan login terlebih dahulu.'
 login_manager.login_message_category = 'warning'
 
 ALLOWED_EXT = Config.ALLOWED_EXTENSIONS
+ALLOWED_DOC_EXT = Config.ALLOWED_DOC_EXTENSIONS
 
 
 # ---------------------------------------------------------------------------
@@ -39,6 +40,10 @@ ALLOWED_EXT = Config.ALLOWED_EXTENSIONS
 # ---------------------------------------------------------------------------
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
+
+
+def allowed_doc(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_DOC_EXT
 
 
 def _parse_foto_list(lampiran_foto):
@@ -287,14 +292,21 @@ def add_surat():
                 flash(f'Field {f} harus diisi!', 'danger')
                 return redirect(url_for('add_surat'))
 
-        foto_filenames = []
-        fotos = request.files.getlist('lampiran_foto')
-        for foto in fotos:
-            if foto and foto.filename and allowed_file(foto.filename):
-                ext = foto.filename.rsplit('.', 1)[1].lower()
-                fname = f"{uuid.uuid4().hex}.{ext}"
-                foto.save(os.path.join(Config.UPLOAD_DIR, fname))
-                foto_filenames.append(fname)
+        # Handle KTP photo upload
+        foto_ktp_name = None
+        ktp_file = request.files.get('foto_ktp')
+        if ktp_file and ktp_file.filename and allowed_file(ktp_file.filename):
+            ext = ktp_file.filename.rsplit('.', 1)[1].lower()
+            foto_ktp_name = f"{uuid.uuid4().hex}.{ext}"
+            ktp_file.save(os.path.join(Config.UPLOAD_DIR, foto_ktp_name))
+
+        # Handle SPK file upload
+        file_spk_name = None
+        spk_file = request.files.get('file_spk')
+        if spk_file and spk_file.filename and allowed_doc(spk_file.filename):
+            ext = spk_file.filename.rsplit('.', 1)[1].lower()
+            file_spk_name = f"{uuid.uuid4().hex}.{ext}"
+            spk_file.save(os.path.join(Config.UPLOAD_DIR, file_spk_name))
 
         try:
             barang = json.loads(request.form.get('barang_items', '[]'))
@@ -319,9 +331,9 @@ def add_surat():
         sid = _exec(conn, """
             INSERT INTO surat_izin
             (jenis,no_surat,tanggal,tgl_terbit,divisi,nama,badge,no_kendaraan,
-             perusahaan,no_spk,pemohon,diperiksa_oleh,disetujui_oleh,
+             perusahaan,no_spk,foto_ktp,file_spk,pemohon,diperiksa_oleh,disetujui_oleh,
              barang_items,lampiran_foto,status,created_by)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             jenis,
             request.form['no_surat'].strip(),
@@ -333,11 +345,13 @@ def add_surat():
             request.form['no_kendaraan'].strip(),
             request.form['perusahaan'].strip(),
             request.form['no_spk'].strip(),
+            foto_ktp_name,
+            file_spk_name,
             request.form['pemohon'].strip(),
             request.form['diperiksa_oleh'].strip(),
             request.form['disetujui_oleh'].strip(),
             json.dumps(barang, ensure_ascii=False),
-            json.dumps(foto_filenames) if foto_filenames else None,
+            None,  # lampiran_foto — photos are now managed per-item in barang_items
             'pending',
             current_user.id,
         ))
@@ -402,17 +416,21 @@ def edit_surat(id):
         flash('Surat tidak ditemukan.', 'danger')
         return redirect(url_for('surat_list'))
     if request.method == 'POST':
-        # Retain existing photos
-        existing_fotos = _parse_foto_list(surat['lampiran_foto'])
-        # Add newly uploaded photos
-        new_fotos = request.files.getlist('lampiran_foto')
-        for foto in new_fotos:
-            if foto and foto.filename and allowed_file(foto.filename):
-                ext = foto.filename.rsplit('.', 1)[1].lower()
-                fname = f"{uuid.uuid4().hex}.{ext}"
-                foto.save(os.path.join(Config.UPLOAD_DIR, fname))
-                existing_fotos.append(fname)
-        foto_value = json.dumps(existing_fotos) if existing_fotos else None
+        # Handle KTP photo upload
+        foto_ktp_name = surat.get('foto_ktp')
+        ktp_file = request.files.get('foto_ktp')
+        if ktp_file and ktp_file.filename and allowed_file(ktp_file.filename):
+            ext = ktp_file.filename.rsplit('.', 1)[1].lower()
+            foto_ktp_name = f"{uuid.uuid4().hex}.{ext}"
+            ktp_file.save(os.path.join(Config.UPLOAD_DIR, foto_ktp_name))
+
+        # Handle SPK file upload
+        file_spk_name = surat.get('file_spk')
+        spk_file = request.files.get('file_spk')
+        if spk_file and spk_file.filename and allowed_doc(spk_file.filename):
+            ext = spk_file.filename.rsplit('.', 1)[1].lower()
+            file_spk_name = f"{uuid.uuid4().hex}.{ext}"
+            spk_file.save(os.path.join(Config.UPLOAD_DIR, file_spk_name))
 
         try:
             barang = json.loads(request.form.get('barang_items', '[]'))
@@ -438,8 +456,8 @@ def edit_surat(id):
         _exec(conn, """
             UPDATE surat_izin SET
               jenis=%s,no_surat=%s,tanggal=%s,tgl_terbit=%s,divisi=%s,nama=%s,badge=%s,
-              no_kendaraan=%s,perusahaan=%s,no_spk=%s,pemohon=%s,diperiksa_oleh=%s,
-              disetujui_oleh=%s,barang_items=%s,lampiran_foto=%s
+              no_kendaraan=%s,perusahaan=%s,no_spk=%s,foto_ktp=%s,file_spk=%s,pemohon=%s,
+              diperiksa_oleh=%s,disetujui_oleh=%s,barang_items=%s
             WHERE id=%s
         """, (
             request.form.get('jenis', surat['jenis']),
@@ -452,11 +470,12 @@ def edit_surat(id):
             request.form['no_kendaraan'].strip(),
             request.form['perusahaan'].strip(),
             request.form['no_spk'].strip(),
+            foto_ktp_name,
+            file_spk_name,
             request.form['pemohon'].strip(),
             request.form['diperiksa_oleh'].strip(),
             request.form['disetujui_oleh'].strip(),
             json.dumps(barang, ensure_ascii=False),
-            foto_value,
             id,
         ))
         conn.close()
@@ -678,8 +697,14 @@ def export_pdf(id):
         surat['creator_name'] = ''
     conn.close()
 
+    # Build SPK download URL for the PDF link
+    spk_url = None
+    if surat.get('file_spk'):
+        spk_url = request.host_url.rstrip('/') + url_for('static', filename='uploads/' + surat['file_spk'])
+
     html = render_template('pdf_template.html', surat=surat,
-                           upload_dir=os.path.abspath(Config.UPLOAD_DIR))
+                           upload_dir=os.path.abspath(Config.UPLOAD_DIR),
+                           spk_url=spk_url)
     try:
         from weasyprint import HTML
         from pathlib import Path
